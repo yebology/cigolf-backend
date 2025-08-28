@@ -366,13 +366,13 @@ async function main() {
 
                             // occasionally use special places if divisi allows "All"
                             if (Math.random() < 0.1) {
-                                const specialPlaces = ["Family Club - East", "Family Club - Lumbar", "Club House"];
+                                const specialPlaces = ["Family Club", "Club House", "Teras"];
                                 hole = specialPlaces[faker.number.int({ min: 0, max: specialPlaces.length - 1 })];
                             }
                         }
                     }
                 }
-                
+
                 const keterangan = mingguDetail?.keterangan || faker.lorem.sentence();
 
                 // tk_butuh / tk_tersedia / nama_tk
