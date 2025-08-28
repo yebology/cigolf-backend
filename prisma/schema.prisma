@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -8,33 +7,144 @@ datasource db {
   url      = env("POSTGRES_URL")
 }
 
+model bridge_laphar_hardet {
+  id             Int             @id @default(autoincrement())
+  id_laphar      Int?
+  id_hardet      Int?
+  created_at     DateTime?       @default(now()) @db.Timestamp(6)
+  harian_detail  harian_detail?  @relation(fields: [id_hardet], references: [id], onDelete: Cascade, map: "fk_bridgehar_hardet")
+  laporan_harian laporan_harian? @relation(fields: [id_laphar], references: [id], onDelete: Cascade, map: "fk_bridgehar_laphar")
+}
+
+model bridge_lapming_mingdet {
+  id               Int               @id @default(autoincrement())
+  id_lapming       Int?
+  id_mingdet       Int?
+  created_at       DateTime?         @default(now()) @db.Timestamp(6)
+  laporan_mingguan laporan_mingguan? @relation(fields: [id_lapming], references: [id], onDelete: Cascade, map: "fk_bridgeming_lapming")
+  minggu_detail    minggu_detail?    @relation(fields: [id_mingdet], references: [id], onDelete: Cascade, map: "fk_bridgeming_mingdet")
+}
+
+model divisi {
+  id            Int             @id @default(autoincrement())
+  divisi        String          @db.VarChar(255)
+  created_at    DateTime?       @default(now()) @db.Timestamp(6)
+  harian_detail harian_detail[]
+  minggu_detail minggu_detail[]
+}
+
+model harian_detail {
+  id                   Int                    @id @default(autoincrement())
+  id_mingdet           Int?
+  title                String
+  id_lokasi            Int
+  id_divisi            Int
+  prioritas            prioritas              @default(P3)
+  hole                 String?                @db.VarChar(255)
+  tk_butuh             Int?
+  tk_tersedia          Int?
+  nama_tk              String?
+  keterangan           String?
+  url_foto             String?
+  is_done              Boolean                @default(false)
+  created_at           DateTime?              @default(now()) @db.Timestamp(6)
+  bridge_laphar_hardet bridge_laphar_hardet[]
+  divisi               divisi                 @relation(fields: [id_divisi], references: [id], onDelete: NoAction, map: "fk_hardet_divisi")
+  lokasi               lokasi                 @relation(fields: [id_lokasi], references: [id], onDelete: NoAction, map: "fk_hardet_lokasi")
+  minggu_detail        minggu_detail?         @relation(fields: [id_mingdet], references: [id], onDelete: NoAction, map: "fk_hardet_mingdet")
+}
+
+model laporan_harian {
+  id                   Int                    @id @default(autoincrement())
+  id_mandor            Int
+  tanggal              DateTime               @default(now()) @db.Date
+  id_region            Int
+  is_approved          Boolean                @default(false)
+  created_at           DateTime?              @default(now()) @db.Timestamp(6)
+  bridge_laphar_hardet bridge_laphar_hardet[]
+  mandor               mandor                 @relation(fields: [id_mandor], references: [id], onDelete: NoAction, map: "fk_laphar_mandor")
+  region               region                 @relation(fields: [id_region], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_laphar_region")
+}
+
+model laporan_mingguan {
+  id                     Int                      @id @default(autoincrement())
+  title                  String
+  tanggal_mulai          DateTime                 @db.Date
+  tanggal_selesai        DateTime                 @db.Date
+  created_at             DateTime?                @default(now()) @db.Timestamp(6)
+  bridge_lapming_mingdet bridge_lapming_mingdet[]
+}
+
+model lokasi {
+  id            Int             @id @default(autoincrement())
+  lokasi        String          @db.VarChar(255)
+  created_at    DateTime?       @default(now()) @db.Timestamp(6)
+  harian_detail harian_detail[]
+  minggu_detail minggu_detail[]
+}
+
+model mandor {
+  id             Int              @id @default(autoincrement())
+  id_user        Int
+  id_region      Int
+  created_at     DateTime?        @default(now()) @db.Timestamp(6)
+  laporan_harian laporan_harian[]
+  region         region           @relation(fields: [id_region], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mandor_region")
+  users          User             @relation(fields: [id_user], references: [id], onDelete: NoAction, map: "fk_mandor_users")
+}
+
+model minggu_detail {
+  id                     Int                      @id @default(autoincrement())
+  title                  String
+  id_lokasi              Int
+  id_divisi              Int
+  prioritas              prioritas                @default(P3)
+  tanggal_mulai          DateTime?                @default(now()) @db.Date
+  hole                   String?                  @db.VarChar(255)
+  keterangan             String?
+  is_done                Boolean?
+  created_at             DateTime?                @default(now()) @db.Timestamp(6)
+  bridge_lapming_mingdet bridge_lapming_mingdet[]
+  harian_detail          harian_detail[]
+  divisi                 divisi                   @relation(fields: [id_divisi], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mingdet_divisi")
+  lokasi                 lokasi                   @relation(fields: [id_lokasi], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mingdet_lokasi")
+}
+
+model region {
+  id             Int              @id @default(autoincrement())
+  region         String           @db.VarChar(255)
+  created_at     DateTime?        @default(now()) @db.Timestamp(6)
+  laporan_harian laporan_harian[]
+  mandor         mandor[]
+}
+
+model role {
+  id         Int       @id @default(autoincrement())
+  role       String    @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  users      User[]
+}
+
 model User {
-  id       Int     @id @default(autoincrement())
-  username String  @unique
-  password String
-  role_id  Int
-  nama     String
-  no_telp  String
-  mandor   Mandor?
-  role     Role    @relation(fields: [role_id], references: [id])
+  id            Int       @id @default(autoincrement())
+  username      String    @unique @db.VarChar(50)
+  password_hash String    @map("password_hash")
+  nama          String    @db.VarChar(255)
+  id_role       Int
+  no_telp       String    @db.VarChar(255)
+  email         String    @db.VarChar(100)
+  is_active     Boolean   @default(true)
+  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  mandor        mandor[]
+  role          role      @relation(fields: [id_role], references: [id], onDelete: NoAction, map: "fk_users_role")
+
+  @@map("users")
 }
 
-model Role {
-  id    Int    @id @default(autoincrement())
-  name  String
-  users User[]
-}
-
-model Region {
-  id      Int      @id @default(autoincrement())
-  name    String
-  mandors Mandor[]
-}
-
-model Mandor {
-  id        Int    @id @default(autoincrement())
-  user_id   Int    @unique
-  region_id Int
-  region    Region @relation(fields: [region_id], references: [id])
-  user      User   @relation(fields: [user_id], references: [id])
+enum prioritas {
+  P1
+  P2
+  P3
+  P4
+  P5
 }
