@@ -2,11 +2,15 @@ import express from "express";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
 import path from "path";
+import userRoutes from "./src/modules/user/user.routes";
+import weeklyPlanRoutes from "./src/modules/weekly-program/weekly-program.routes";
+
 
 dotenv.config();
 
 const PORT = process.env.PORT;
 const NODE_ENV = process.env.NODE_ENV;
+const VERSION = process.env.VERSION;
 
 console.log("ENVIRONMENT:", NODE_ENV);
 
@@ -14,6 +18,9 @@ const app = express();
 const prisma = new PrismaClient();
 
 app.use(express.json());
+
+app.use(`api/${VERSION}`, userRoutes);
+app.use(`/api/${VERSION}/weekly-plan`, weeklyPlanRoutes)
 
 app.get("/health", async (req, res) => {
   try {
