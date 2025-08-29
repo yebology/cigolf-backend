@@ -15,6 +15,7 @@ export const getWeeklyPlanHistories = async (req: Request, res: Response) => {
       );
     } else {
       result = await service.getWeeklyPlanHistories();
+      console.log(result);
     }
     res.json({
       status: "success",
@@ -23,25 +24,26 @@ export const getWeeklyPlanHistories = async (req: Request, res: Response) => {
     });
   } catch (error) {
     res
-      .status(401)
+      .status(422)
       .json({ status: "error", message: (error as Error).message });
   }
 };
 
-export const getWeeklyPlanDetail = async (req: Request, res: Response) => {
-  try {
-    const { WEEKLY_ID } = req.params;
+// export const getWeeklyPlanDetail = async (req: Request, res: Response) => {
+//   try {
+//     const id = req.params.id;
+//     console.log(id);
 
-    if (WEEKLY_ID) {
-      const result = await service.getWeeklyPlanDetail(WEEKLY_ID);
-      res.json({
-        status: "success",
-        message: "Weekly plan fetch successfuly.",
-      });
-    }
-  } catch (error) {
-    res
-      .status(401)
-      .json({ status: "error", message: (error as Error).message });
-  }
-};
+//     const result = await service.getWeeklyPlanDetail(id);
+
+//     res.json({
+//       status: "success",
+//       message: "Weekly plan fetch successfuly.",
+//       data: result,
+//     });
+//   } catch (error) {
+//     res
+//       .status(401)
+//       .json({ status: "error", message: (error as Error).message });
+//   }
+// };

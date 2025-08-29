@@ -10,7 +10,7 @@ export const verifyToken = (
   const token = authHeader?.split(" ")[1];
 
   if (!token || !authHeader) {
-    res
+    return res
       .status(401)
       .json({ message: "Authentication token is missing or invalid." });
   }
@@ -19,7 +19,7 @@ export const verifyToken = (
 
   jwt.verify(token!, secretKey!, (error, decoded) => {
     if (error) {
-      res
+      return res
         .status(401)
         .json({ message: "Authentication token is missing or invalid." });
     }

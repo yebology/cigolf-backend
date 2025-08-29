@@ -1,5 +1,6 @@
 import { UserRepository } from "./user.repository";
 import { generateJwt } from "./user.helper";
+import bcrypt from "bcrypt";
 
 const repo = new UserRepository();
 
@@ -7,11 +8,13 @@ export class UserService {
   async login(username: string, password: string) {
     const user = await repo.findByUsername(username);
 
-    if (!user || user.password_hash != password) {
+    const isValid = await bcrypt.compare(password, user!.password_hash);
+
+    if (!user || !isValid) {
       throw new Error("Invalid username or password.");
     }
 
-    const role = await repo.findRoleById(user!.id_role);
+    const role = await repo.findRoleById(user!.role_id);
     const token = generateJwt(user!, role!);
 
     return {
@@ -21,7 +24,7 @@ export class UserService {
       user: {
         id: user.id,
         username: user.username,
-        name: user.nama,
+        name: user.name,
         role: role?.role,
       },
     };

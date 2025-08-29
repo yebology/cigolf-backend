@@ -11,20 +11,21 @@ export class WeeklyPlanService {
   async getFilteredWeeklyPlanHistories(start_at: string, end_at: string) {
     const histories = await repo.findByDateRange(start_at, end_at);
 
-    if (!histories) {
+    if (!histories || histories.length === 0) {
       throw new Error("invalid params");
     }
 
     return histories;
   }
 
-  async getWeeklyPlanDetail(id: string) {
-    const detail = await repo.findDetail(Number(id));
+  // async getWeeklyPlanDetail(id: string) {
+  //   const detail = await repo.findDetail(Number(id));
+  //   console.log(detail);
 
-    if (!detail) {
-      throw new Error("The requested resource was not found.");
-    }
+  //   if (!detail) {
+  //     throw new Error("The requested resource was not found.");
+  //   }
 
-    return detail;
-  }
+  //   return detail;
+  // }
 }
