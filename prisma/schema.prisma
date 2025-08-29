@@ -8,21 +8,11 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model mandor {
-  id           Int            @id @default(autoincrement())
-  id_user      Int
-  id_region    Int
-  created_at   DateTime?      @default(now()) @db.Timestamp(6)
-  daily_report daily_report[]
-  region       region         @relation(fields: [id_region], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mandor_region")
-  users        User           @relation(fields: [id_user], references: [id], onDelete: NoAction, map: "fk_mandor_users")
-}
-
 model weekly_detail {
   id                     Int                      @id @default(autoincrement())
   title_task             String
-  id_location            Int
-  id_division            Int
+  location_id            Int
+  division_id            Int
   priority               priority                 @default(P3)
   start_date             DateTime?                @default(now()) @db.Date
   hole                   String?                  @db.VarChar(255)
@@ -31,8 +21,8 @@ model weekly_detail {
   created_at             DateTime?                @default(now()) @db.Timestamp(6)
   bridge_weekrep_weekdet bridge_weekrep_weekdet[]
   daily_detail           daily_detail[]
-  division               division                 @relation(fields: [id_division], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mingdet_division")
-  location               location                 @relation(fields: [id_location], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mingdet_location")
+  division               division                 @relation(fields: [division_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mingdet_division")
+  location               location                 @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_mingdet_location")
 }
 
 model region {
@@ -40,7 +30,7 @@ model region {
   region       String         @db.VarChar(255)
   created_at   DateTime?      @default(now()) @db.Timestamp(6)
   daily_report daily_report[]
-  mandor       mandor[]
+  foreman      foreman[]
 }
 
 model role {
@@ -55,41 +45,41 @@ model User {
   username      String    @unique @db.VarChar(50)
   password_hash String    @map("password_hash")
   name          String    @db.VarChar(255)
-  id_role       Int
+  role_id       Int
   phone_number  String    @db.VarChar(255)
   email         String    @db.VarChar(100)
   is_active     Boolean   @default(true)
   created_at    DateTime? @default(now()) @db.Timestamp(6)
-  mandor        mandor[]
-  role          role      @relation(fields: [id_role], references: [id], onDelete: NoAction, map: "fk_users_role")
+  foreman       foreman[]
+  role          role      @relation(fields: [role_id], references: [id], onDelete: NoAction, map: "fk_users_role")
 
   @@map("users")
 }
 
 model bridge_dailyrep_dailydet {
   id           Int           @id @default(autoincrement())
-  id_dailyrep  Int?
-  id_dailydet  Int?
+  dailyrep_id  Int?
+  dailydet_id  Int?
   created_at   DateTime?     @default(now()) @db.Timestamp(6)
-  daily_detail daily_detail? @relation(fields: [id_dailydet], references: [id], onDelete: Cascade, map: "fk_bridgehar_hardet")
-  daily_report daily_report? @relation(fields: [id_dailyrep], references: [id], onDelete: Cascade, map: "fk_bridgehar_laphar")
+  daily_detail daily_detail? @relation(fields: [dailydet_id], references: [id], onDelete: Cascade, map: "fk_bridgehar_hardet")
+  daily_report daily_report? @relation(fields: [dailyrep_id], references: [id], onDelete: Cascade, map: "fk_bridgehar_laphar")
 }
 
 model bridge_weekrep_weekdet {
   id            Int            @id @default(autoincrement())
-  id_weekrep    Int?
-  id_weekdet    Int?
+  weekrep_id    Int?
+  weekdet_id    Int?
   created_at    DateTime?      @default(now()) @db.Timestamp(6)
-  weekly_report weekly_report? @relation(fields: [id_weekrep], references: [id], onDelete: Cascade, map: "fk_bridgeming_lapming")
-  weekly_detail weekly_detail? @relation(fields: [id_weekdet], references: [id], onDelete: Cascade, map: "fk_bridgeming_mingdet")
+  weekly_report weekly_report? @relation(fields: [weekrep_id], references: [id], onDelete: Cascade, map: "fk_bridgeming_lapming")
+  weekly_detail weekly_detail? @relation(fields: [weekdet_id], references: [id], onDelete: Cascade, map: "fk_bridgeming_mingdet")
 }
 
 model daily_detail {
   id                       Int                        @id @default(autoincrement())
-  id_weekdet               Int?
+  weekdet_id               Int?
   title_task               String
-  id_location              Int
-  id_division              Int
+  location_id              Int
+  division_id              Int
   priority                 priority                   @default(P3)
   hole                     String?                    @db.VarChar(255)
   worker_need              Int?
@@ -100,21 +90,21 @@ model daily_detail {
   is_done                  Boolean                    @default(false)
   created_at               DateTime?                  @default(now()) @db.Timestamp(6)
   bridge_dailyrep_dailydet bridge_dailyrep_dailydet[]
-  division                 division                   @relation(fields: [id_division], references: [id], onDelete: NoAction, map: "fk_hardet_division")
-  location                 location                   @relation(fields: [id_location], references: [id], onDelete: NoAction, map: "fk_hardet_location")
-  weekly_detail            weekly_detail?             @relation(fields: [id_weekdet], references: [id], onDelete: NoAction, map: "fk_hardet_mingdet")
+  division                 division                   @relation(fields: [division_id], references: [id], onDelete: NoAction, map: "fk_hardet_division")
+  location                 location                   @relation(fields: [location_id], references: [id], onDelete: NoAction, map: "fk_hardet_location")
+  weekly_detail            weekly_detail?             @relation(fields: [weekdet_id], references: [id], onDelete: NoAction, map: "fk_hardet_mingdet")
 }
 
 model daily_report {
   id                       Int                        @id @default(autoincrement())
-  id_mandor                Int
+  foreman_id               Int
   date                     DateTime                   @default(now()) @db.Date
-  id_region                Int
+  region_id                Int
   is_approved              Boolean                    @default(false)
   created_at               DateTime?                  @default(now()) @db.Timestamp(6)
   bridge_dailyrep_dailydet bridge_dailyrep_dailydet[]
-  mandor                   mandor                     @relation(fields: [id_mandor], references: [id], onDelete: NoAction, map: "fk_laphar_mandor")
-  region                   region                     @relation(fields: [id_region], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_laphar_region")
+  foreman                  foreman                    @relation(fields: [foreman_id], references: [id], onDelete: NoAction, map: "fk_laphar_foreman")
+  region                   region                     @relation(fields: [region_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_laphar_region")
 }
 
 model division {
@@ -136,9 +126,19 @@ model location {
 model weekly_report {
   id                     Int                      @id @default(autoincrement())
   start_date             DateTime                 @db.Date
-  end_date              DateTime                 @db.Date
+  end_date               DateTime                 @db.Date
   created_at             DateTime?                @default(now()) @db.Timestamp(6)
   bridge_weekrep_weekdet bridge_weekrep_weekdet[]
+}
+
+model foreman {
+  id           Int            @id @default(autoincrement())
+  user_id      Int
+  region_id    Int
+  created_at   DateTime?      @default(now()) @db.Timestamp(6)
+  daily_report daily_report[]
+  region       region         @relation(fields: [region_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_foreman_region")
+  users        User           @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "fk_foreman_users")
 }
 
 enum priority {

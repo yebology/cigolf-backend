@@ -30,7 +30,7 @@ async function main() {
                 name: faker.person.fullName(),
                 email: faker.internet.email(),
                 phone_number: faker.phone.number(),
-                id_role: roleMap['Admin'],
+                role_id: roleMap['Admin'],
                 is_active: true,
             },
         })
@@ -44,7 +44,7 @@ async function main() {
                 name: faker.person.fullName(),
                 email: faker.internet.email(),
                 phone_number: faker.phone.number(),
-                id_role: roleMap['Supervisor'],
+                role_id: roleMap['Supervisor'],
                 is_active: true,
             },
         })
@@ -58,7 +58,7 @@ async function main() {
                 name: faker.person.fullName(),
                 email: faker.internet.email(),
                 phone_number: faker.phone.number(),
-                id_role: roleMap['Mandor'],
+                role_id: roleMap['Mandor'],
                 is_active: true,
             },
         })
@@ -74,12 +74,12 @@ async function main() {
         skipDuplicates: true,
     })
 
-    // -MARK: Mandors
-    await prisma.mandor.createMany({
+    // -MARK: foremans
+    await prisma.foreman.createMany({
         data: [
-            { id_region: 1, id_user: 6 },
-            { id_region: 2, id_user: 7 },
-            { id_region: 3, id_user: 8 },
+            { region_id: 1, user_id: 6 },
+            { region_id: 2, user_id: 7 },
+            { region_id: 3, user_id: 8 },
         ],
         skipDuplicates: true,
     })
@@ -119,19 +119,19 @@ async function main() {
     })
 
     // -MARK: Laporan Harian
-    const mandors = await prisma.mandor.findMany({
-        select: { id: true, id_region: true }, // adjust column names if different
+    const foremans = await prisma.foreman.findMany({
+        select: { id: true, region_id: true }, // adjust column names if different
     });
 
     const startDate = new Date('2025-01-01');
     for (let i = 0; i < 30; i++) {
         const date = addDays(startDate, i);
-        const mandor = mandors[i % mandors.length]; // cycle through mandors
+        const foreman = foremans[i % foremans.length]; // cycle through foremans
 
         await prisma.daily_report.create({
             data: {
-                id_mandor: mandor.id,
-                id_region: mandor.id_region,
+                foreman_id: foreman.id,
+                region_id: foreman.region_id,
                 date,
                 is_approved: i < 20,
             },
@@ -174,14 +174,16 @@ async function main() {
         { location: 'Mekanik', division: 'Mekanik' },
         { location: 'Irigasi', division: 'Irigasi' },
     ];
+    
+    const weeklyReports = await prisma.weekly_report.findMany({
+        orderBy: { id: "asc" },
+    });
 
     for (let i = 0; i < 50; i++) {
         const division = divisionoption[i % divisionoption.length];
 
-        // 🔹 Find matching location
         let locationCandidates = locationOptions.filter(l => l.division === division.division);
 
-        // 🔹 Special case: Operasional has a 10% chance to use "All"
         if (division.division === "Operasional" && Math.random() < 0.1) {
             locationCandidates.push({ location: "All", division: "Operasional" });
         }
@@ -189,17 +191,15 @@ async function main() {
         // Pick random location from the candidates
         const location = locationCandidates[Math.floor(Math.random() * locationCandidates.length)];
 
-        const lapming = await prisma.weekly_report.findFirst({
-            orderBy: { id: "asc" },
-        });
+        const weekrep = weeklyReports[Math.floor(Math.random() * weeklyReports.length)];
 
         let start_date: Date | null = null;
-        if (lapming && Math.random() > 0.2) {
-            const randomDay = addDays(lapming.start_date, Math.floor(Math.random() * 6));
+        if (weekrep && Math.random() > 0.2) {
+            const randomDay = addDays(weekrep.start_date, Math.floor(Math.random() * 6));
             if (
                 isWithinInterval(randomDay, {
-                    start: lapming.start_date,
-                    end: lapming.end_date,
+                    start: weekrep.start_date,
+                    end: weekrep.end_date,
                 })
             ) {
                 start_date = randomDay;
@@ -241,8 +241,8 @@ async function main() {
         await prisma.weekly_detail.create({
             data: {
                 title_task: `Task ${i + 1} - ${division.division}`,
-                id_division: division.id,
-                id_location:
+                division_id: division.id,
+                location_id:
                     locationoption.find(l => l.location === location?.location)?.id || locationoption[0].id,
                 priority: priority[`P${faker.number.int({ min: 1, max: 5 })}` as keyof typeof priority], // ensure it's typed correctly
                 start_date,
@@ -253,45 +253,45 @@ async function main() {
         });
     }
 
-    const laporanMingguans = await prisma.weekly_report.findMany();
-    const mingguDetail = await prisma.weekly_detail.findMany(); // contains division info
+    //-MARK: - Bridge Weekly Detail
+    const weeklyDetail = await prisma.weekly_detail.findMany({
+        orderBy: { id: "asc" },
+    });
 
-    // Group mingguDetail by division
-    const groupedBydivision = mingguDetail.reduce((acc, detail) => {
-        if (!acc[detail.id_division]) acc[detail.id_division] = [];
-        acc[detail.id_division].push(detail);
-        return acc;
-    }, {} as Record<string, typeof mingguDetails>);
-
-    for (const lapming of laporanMingguans) {
-        // Ensure at least one weekly_detail per division
-        for (const division in groupedBydivision) {
-            const randomDetail =
-                groupedBydivision[division][
-                Math.floor(Math.random() * groupedBydivision[division].length)
-                ];
-
-            await prisma.bridge_weekrep_weekdet.create({
-                data: {
-                    id_weekrep: lapming.id,
-                    id_weekdet: randomDetail.id,
-                },
+    for (const weekrep of weeklyReports) {
+        for (const div of divisionoption) {
+            const validDetails = weeklyDetail.filter(d => {
+                if (d.division_id !== div.id) return false;
+                if (!d.start_date) return true;
+                return isWithinInterval(d.start_date, {
+                    start: weekrep.start_date,
+                    end: weekrep.end_date,
+                });
             });
+            for (const detail of validDetails) {
+                await prisma.bridge_weekrep_weekdet.create({
+                    data: {
+                        weekrep_id: weekrep.id,
+                        weekdet_id: detail.id,
+                    },
+                });
+            }
         }
     }
 
-    // -MARK: Harian Detail + Bridge Laphar Hardet
-    const laporanHarian = await prisma.daily_report.findMany({
+
+    // -MARK: Harian Detail + Bridge dailyrep Hardet
+    const dailyReports = await prisma.daily_report.findMany({
         orderBy: { id: 'asc' },
     });
 
-    const mingguDetails = await prisma.weekly_detail.findMany();
+    const weeklyDetails = await prisma.weekly_detail.findMany();
     const division = await prisma.division.findMany();
     const location = await prisma.location.findMany();
 
-    const usedMingguDetailIds = new Set<number>();
+    const usedweeklyDetailIds = new Set<number>();
 
-    for (const lapHar of laporanHarian) {
+    for (const dailyrep of dailyReports) {
         for (const div of division) {
             let taskCount = 0;
             switch (div.division) {
@@ -314,36 +314,36 @@ async function main() {
 
             for (let i = 0; i < taskCount; i++) {
                 // Find available weekly_detail that matches
-                const matchingMinggu = mingguDetails.filter(
+                const matchingMinggu = weeklyDetails.filter(
                     md =>
-                        md.id_division === div.id &&
+                        md.division_id === div.id &&
                         md.start_date &&
-                        isSameDay(md.start_date, lapHar.date) &&
-                        !usedMingguDetailIds.has(md.id) // ✅ only unused ones
+                        isSameDay(md.start_date, dailyrep.date) &&
+                        !usedweeklyDetailIds.has(md.id) // ✅ only unused ones
                 );
 
-                let mingguDetail;
+                let weeklyDetail;
                 if (matchingMinggu.length > 0) {
-                    mingguDetail =
+                    weeklyDetail =
                         matchingMinggu[faker.number.int({ min: 0, max: matchingMinggu.length - 1 })];
-                    usedMingguDetailIds.add(mingguDetail.id); // ✅ mark as used
+                    usedweeklyDetailIds.add(weeklyDetail.id); // ✅ mark as used
                 } else {
-                    mingguDetail = null;
+                    weeklyDetail = null;
                 }
 
                 // Assign fields
-                const title_task = mingguDetail?.title_task || `Task ${div.division} ${i + 1}`;
-                const id_location =
-                    mingguDetail?.id_location ||
+                const title_task = weeklyDetail?.title_task || `Task ${div.division} ${i + 1}`;
+                const location_id =
+                    weeklyDetail?.location_id ||
                     location[faker.number.int({ min: 0, max: location.length - 1 })].id;
 
                 const prior =
-                    mingguDetail?.priority ??
+                    weeklyDetail?.priority ??
                     priority[`P${faker.number.int({ min: 1, max: 5 })}` as keyof typeof priority];
 
-                const hole = mingguDetail?.hole || (Math.random() < 0.5 ? `Hole ${faker.number.int({ min: 1, max: 27 })}` : null);
+                const hole = weeklyDetail?.hole || (Math.random() < 0.5 ? `Hole ${faker.number.int({ min: 1, max: 27 })}` : null);
 
-                const detail = mingguDetail?.detail || faker.lorem.sentence();
+                const detail = weeklyDetail?.detail || faker.lorem.sentence();
 
                 // tk_butuh / tk_tersedia / nama_tk
                 let worker_need;
@@ -361,12 +361,12 @@ async function main() {
                     worker_name = null;
                 }
 
-                const harian = await prisma.daily_detail.create({
+                const dailydet = await prisma.daily_detail.create({
                     data: {
-                        id_weekdet: mingguDetail?.id || null,
+                        weekdet_id: weeklyDetail?.id || null,
                         title_task,
-                        id_location,
-                        id_division: div.id,
+                        location_id,
+                        division_id: div.id,
                         priority: prior,
                         hole,
                         worker_need,
@@ -374,14 +374,14 @@ async function main() {
                         worker_name,
                         detail,
                         url_photo: null,
-                        is_done: mingguDetail?.is_done ?? (Math.random() < 0.3)
+                        is_done: weeklyDetail?.is_done ?? (Math.random() < 0.3)
                     },
                 });
 
                 await prisma.bridge_dailyrep_dailydet.create({
                     data: {
-                        id_dailyrep: lapHar.id,
-                        id_dailydet: harian.id,
+                        dailyrep_id: dailyrep.id,
+                        dailydet_id: dailydet.id,
                     },
                 });
             }
