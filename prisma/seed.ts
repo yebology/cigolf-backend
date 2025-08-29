@@ -1,21 +1,12 @@
-import { PrismaClient } from '@prisma/client'
-import { faker } from '@faker-js/faker'
-import bcrypt from 'bcrypt'
+import { PrismaClient, priority } from '@prisma/client';
+import { faker } from '@faker-js/faker';
+import bcrypt from 'bcrypt';
 import { addDays, addWeeks, isWithinInterval, isSameDay } from 'date-fns';
 
 const prisma = new PrismaClient();
 
 async function main() {
     console.log('🌱 Seeding...')
-
-    enum prioritas {
-        P1,
-        P2,
-        P3,
-        P4,
-        P5
-    }
-
     // - MARK: Roles
     await prisma.role.createMany({
         data: [
@@ -36,9 +27,9 @@ async function main() {
             data: {
                 username: faker.internet.username(),
                 password_hash: await bcrypt.hash('password123', 10),
-                nama: faker.person.fullName(),
+                name: faker.person.fullName(),
                 email: faker.internet.email(),
-                no_telp: faker.phone.number(),
+                phone_number: faker.phone.number(),
                 id_role: roleMap['Admin'],
                 is_active: true,
             },
@@ -50,9 +41,9 @@ async function main() {
             data: {
                 username: faker.internet.username(),
                 password_hash: await bcrypt.hash('password123', 10),
-                nama: faker.person.fullName(),
+                name: faker.person.fullName(),
                 email: faker.internet.email(),
-                no_telp: faker.phone.number(),
+                phone_number: faker.phone.number(),
                 id_role: roleMap['Supervisor'],
                 is_active: true,
             },
@@ -64,16 +55,16 @@ async function main() {
             data: {
                 username: faker.internet.username(),
                 password_hash: await bcrypt.hash('password123', 10),
-                nama: faker.person.fullName(),
+                name: faker.person.fullName(),
                 email: faker.internet.email(),
-                no_telp: faker.phone.number(),
+                phone_number: faker.phone.number(),
                 id_role: roleMap['Mandor'],
                 is_active: true,
             },
         })
     }
 
-    // -MARK: Regions
+    // -MARK: regions
     await prisma.region.createMany({
         data: [
             { region: 'Lembah' },
@@ -93,36 +84,36 @@ async function main() {
         skipDuplicates: true,
     })
 
-    // -MARK: Divisi
-    await prisma.divisi.createMany({
+    // -MARK: division
+    await prisma.division.createMany({
         data: [
-            { divisi: 'Operasional' },
-            { divisi: 'Landscape' },
-            { divisi: 'Projek' },
-            { divisi: 'Irigasi' },
-            { divisi: 'Mekanik' },
+            { division: 'Operasional' },
+            { division: 'Landscape' },
+            { division: 'Projek' },
+            { division: 'Irigasi' },
+            { division: 'Mekanik' },
         ],
         skipDuplicates: true,
     })
 
-    // -MARK: Lokasi
-    await prisma.lokasi.createMany({
+    // -MARK: location
+    await prisma.location.createMany({
         data: [
-            { lokasi: 'All' },
-            { lokasi: 'Green' },
-            { lokasi: 'Tee Box' },
-            { lokasi: 'Fairway' },
-            { lokasi: 'Apron' },
-            { lokasi: 'Rough' },
-            { lokasi: 'Bunker' },
-            { lokasi: 'Nursery' },
-            { lokasi: 'Driving Range' },
-            { lokasi: 'Maingate' },
-            { lokasi: 'Putting 10' },
-            { lokasi: 'Paving Room' },
-            { lokasi: 'Resto' },
-            { lokasi: 'Mekanik' },
-            { lokasi: 'Irigasi' },
+            { location: 'All' },
+            { location: 'Green' },
+            { location: 'Tee Box' },
+            { location: 'Fairway' },
+            { location: 'Apron' },
+            { location: 'Rough' },
+            { location: 'Bunker' },
+            { location: 'Nursery' },
+            { location: 'Driving Range' },
+            { location: 'Maingate' },
+            { location: 'Putting 10' },
+            { location: 'Paving Room' },
+            { location: 'Resto' },
+            { location: 'Mekanik' },
+            { location: 'Irigasi' },
         ],
         skipDuplicates: true,
     })
@@ -134,14 +125,14 @@ async function main() {
 
     const startDate = new Date('2025-01-01');
     for (let i = 0; i < 30; i++) {
-        const tanggal = addDays(startDate, i);
+        const date = addDays(startDate, i);
         const mandor = mandors[i % mandors.length]; // cycle through mandors
 
-        await prisma.laporan_harian.create({
+        await prisma.daily_report.create({
             data: {
                 id_mandor: mandor.id,
                 id_region: mandor.id_region,
-                tanggal,
+                date,
                 is_approved: i < 20,
             },
         });
@@ -150,74 +141,73 @@ async function main() {
     // -MARK: Laporan Mingguan
     const weeklyStart = new Date('2025-01-01');
     for (let i = 0; i < 3; i++) {
-        const tanggal_mulai = addWeeks(weeklyStart, i);
-        const tanggal_selesai = addWeeks(tanggal_mulai, 1);
+        const start_date = addWeeks(weeklyStart, i);
+        const end_date = addWeeks(start_date, 1);
 
-        await prisma.laporan_mingguan.create({
+        await prisma.weekly_report.create({
             data: {
-                title: `Laporan Mingguan ke-${i + 1}`,
-                tanggal_mulai,
-                tanggal_selesai,
+                start_date,
+                end_date
             },
         });
     }
 
     // -MARK: Minggu Detail
-    const divisioption = await prisma.divisi.findMany();
-    const lokasioption = await prisma.lokasi.findMany();
+    const divisionoption = await prisma.division.findMany();
+    const locationoption = await prisma.location.findMany();
 
-    const lokasiOptions = [
-        { lokasi: 'All', divisi: 'Landscape' },
-        { lokasi: 'All', divisi: 'Projek' },
-        { lokasi: 'Green', divisi: 'Operasional' },
-        { lokasi: 'Tee Box', divisi: 'Operasional' },
-        { lokasi: 'Fairway', divisi: 'Operasional' },
-        { lokasi: 'Apron', divisi: 'Operasional' },
-        { lokasi: 'Rough', divisi: 'Operasional' },
-        { lokasi: 'Bunker', divisi: 'Operasional' },
-        { lokasi: 'Nursery', divisi: 'Operasional' },
-        { lokasi: 'Driving Range', divisi: 'Operasional' },
-        { lokasi: 'Maingate', divisi: 'Operasional' },
-        { lokasi: 'Putting 10', divisi: 'Operasional' },
-        { lokasi: 'Paving Room', divisi: 'Operasional' },
-        { lokasi: 'Resto', divisi: 'Operasional' },
-        { lokasi: 'Mekanik', divisi: 'Mekanik' },
-        { lokasi: 'Irigasi', divisi: 'Irigasi' },
+    const locationOptions = [
+        { location: 'All', division: 'Landscape' },
+        { location: 'All', division: 'Projek' },
+        { location: 'Green', division: 'Operasional' },
+        { location: 'Tee Box', division: 'Operasional' },
+        { location: 'Fairway', division: 'Operasional' },
+        { location: 'Apron', division: 'Operasional' },
+        { location: 'Rough', division: 'Operasional' },
+        { location: 'Bunker', division: 'Operasional' },
+        { location: 'Nursery', division: 'Operasional' },
+        { location: 'Driving Range', division: 'Operasional' },
+        { location: 'Maingate', division: 'Operasional' },
+        { location: 'Putting 10', division: 'Operasional' },
+        { location: 'Paving Room', division: 'Operasional' },
+        { location: 'Resto', division: 'Operasional' },
+        { location: 'Mekanik', division: 'Mekanik' },
+        { location: 'Irigasi', division: 'Irigasi' },
     ];
 
     for (let i = 0; i < 50; i++) {
-        const divisi = divisioption[i % divisioption.length];
+        const division = divisionoption[i % divisionoption.length];
 
-        // 🔹 Find matching lokasi
-        let lokasiCandidates = lokasiOptions.filter(l => l.divisi === divisi.divisi);
+        // 🔹 Find matching location
+        let locationCandidates = locationOptions.filter(l => l.division === division.division);
 
         // 🔹 Special case: Operasional has a 10% chance to use "All"
-        if (divisi.divisi === "Operasional" && Math.random() < 0.1) {
-            lokasiCandidates.push({ lokasi: "All", divisi: "Operasional" });
+        if (division.division === "Operasional" && Math.random() < 0.1) {
+            locationCandidates.push({ location: "All", division: "Operasional" });
         }
 
-        // Pick random lokasi from the candidates
-        const lokasi = lokasiCandidates[Math.floor(Math.random() * lokasiCandidates.length)];
+        // Pick random location from the candidates
+        const location = locationCandidates[Math.floor(Math.random() * locationCandidates.length)];
 
-        const lapming = await prisma.laporan_mingguan.findFirst({
-            orderBy: { id: "desc" },
+        const lapming = await prisma.weekly_report.findFirst({
+            orderBy: { id: "asc" },
         });
 
-        let tanggal_mulai: Date | null = null;
+        let start_date: Date | null = null;
         if (lapming && Math.random() > 0.2) {
-            const randomDay = addDays(lapming.tanggal_mulai, Math.floor(Math.random() * 6));
+            const randomDay = addDays(lapming.start_date, Math.floor(Math.random() * 6));
             if (
                 isWithinInterval(randomDay, {
-                    start: lapming.tanggal_mulai,
-                    end: lapming.tanggal_selesai,
+                    start: lapming.start_date,
+                    end: lapming.end_date,
                 })
             ) {
-                tanggal_mulai = randomDay;
+                start_date = randomDay;
             }
         }
 
         let hole: string | null = null;
-        if (lokasi?.lokasi === "All" && Math.random() < 0.5) {
+        if (location?.location === "All" && Math.random() < 0.5) {
             const places = ["Family Club - Lembah", "Family Club - Gunung", "Family Club - Danau", "Club House - Lembah", "Club House - Gunung", "Club House - Danau", "Teras - Lembah", "Teras - Gunung", "Teras - Danau"];
             hole = places[Math.floor(Math.random() * places.length)];
         } else if (Math.random() < 0.5) {
@@ -248,66 +238,63 @@ async function main() {
             hole = holeStr;
         }
 
-        await prisma.minggu_detail.create({
+        await prisma.weekly_detail.create({
             data: {
-                title: `Task ${i + 1} - ${divisi.divisi}`,
-                id_divisi: divisi.id,
-                id_lokasi:
-                    lokasioption.find(l => l.lokasi === lokasi?.lokasi)?.id || lokasioption[0].id,
-                prioritas: `P${(i % 5) + 1}` as any, // ensure it's typed correctly
-                tanggal_mulai,
+                title_task: `Task ${i + 1} - ${division.division}`,
+                id_division: division.id,
+                id_location:
+                    locationoption.find(l => l.location === location?.location)?.id || locationoption[0].id,
+                priority: priority[`P${faker.number.int({ min: 1, max: 5 })}` as keyof typeof priority], // ensure it's typed correctly
+                start_date,
                 hole,
-                keterangan: `Keterangan untuk task ${i + 1}`,
-                is_done: tanggal_mulai && Math.random() < 0.3 ? true : false,
+                detail: `detail untuk task ${i + 1}`,
+                is_done: start_date && Math.random() < 0.3 ? true : false,
             },
         });
     }
 
-    // -MARK: Bridge Lapming Mingdet
-    const lapmingList = await prisma.laporan_mingguan.findMany({
-        orderBy: { tanggal_mulai: "asc" },
-    });
+    const laporanMingguans = await prisma.weekly_report.findMany();
+    const mingguDetail = await prisma.weekly_detail.findMany(); // contains division info
 
-    for (const lapming of lapmingList) {
-        // Get all minggu_detail within the week
-        const mingdetList = await prisma.minggu_detail.findMany({
-            where: {
-                tanggal_mulai: {
-                    gte: lapming.tanggal_mulai,
-                    lte: lapming.tanggal_selesai,
+    // Group mingguDetail by division
+    const groupedBydivision = mingguDetail.reduce((acc, detail) => {
+        if (!acc[detail.id_division]) acc[detail.id_division] = [];
+        acc[detail.id_division].push(detail);
+        return acc;
+    }, {} as Record<string, typeof mingguDetails>);
+
+    for (const lapming of laporanMingguans) {
+        // Ensure at least one weekly_detail per division
+        for (const division in groupedBydivision) {
+            const randomDetail =
+                groupedBydivision[division][
+                Math.floor(Math.random() * groupedBydivision[division].length)
+                ];
+
+            await prisma.bridge_weekrep_weekdet.create({
+                data: {
+                    id_weekrep: lapming.id,
+                    id_weekdet: randomDetail.id,
                 },
-            },
-        });
-
-        // Get unique divisi IDs
-        const divisiSet = new Set(mingdetList.map(m => m.id_divisi));
-
-        // Only create bridge if all 5 divisi are present
-        if (divisiSet.size === 5) {
-            for (const mingdet of mingdetList) {
-                await prisma.bridge_lapming_mingdet.create({
-                    data: {
-                        id_lapming: lapming.id,
-                        id_mingdet: mingdet.id,
-                    },
-                });
-            }
+            });
         }
     }
 
     // -MARK: Harian Detail + Bridge Laphar Hardet
-    const laporanHarian = await prisma.laporan_harian.findMany({
+    const laporanHarian = await prisma.daily_report.findMany({
         orderBy: { id: 'asc' },
     });
 
-    const mingguDetails = await prisma.minggu_detail.findMany();
-    const divisi = await prisma.divisi.findMany();
-    const lokasi = await prisma.lokasi.findMany();
+    const mingguDetails = await prisma.weekly_detail.findMany();
+    const division = await prisma.division.findMany();
+    const location = await prisma.location.findMany();
+
+    const usedMingguDetailIds = new Set<number>();
 
     for (const lapHar of laporanHarian) {
-        for (const div of divisi) {
+        for (const div of division) {
             let taskCount = 0;
-            switch (div.divisi) {
+            switch (div.division) {
                 case 'Operasional':
                     taskCount = faker.number.int({ min: 12, max: 16 });
                     break;
@@ -326,92 +313,75 @@ async function main() {
             }
 
             for (let i = 0; i < taskCount; i++) {
-                // Find matching minggu_detail if tanggal_mulai matches
+                // Find available weekly_detail that matches
                 const matchingMinggu = mingguDetails.filter(
                     md =>
-                        md.id_divisi === div.id &&
-                        md.tanggal_mulai &&
-                        isSameDay(md.tanggal_mulai, lapHar.tanggal)
+                        md.id_division === div.id &&
+                        md.start_date &&
+                        isSameDay(md.start_date, lapHar.date) &&
+                        !usedMingguDetailIds.has(md.id) // ✅ only unused ones
                 );
 
                 let mingguDetail;
                 if (matchingMinggu.length > 0) {
-                    mingguDetail = matchingMinggu[faker.number.int({ min: 0, max: matchingMinggu.length - 1 })];
+                    mingguDetail =
+                        matchingMinggu[faker.number.int({ min: 0, max: matchingMinggu.length - 1 })];
+                    usedMingguDetailIds.add(mingguDetail.id); // ✅ mark as used
                 } else {
                     mingguDetail = null;
                 }
 
                 // Assign fields
-                const title = mingguDetail?.title || `Task ${div.divisi} ${i + 1}`;
-                const id_lokasi = mingguDetail?.id_lokasi || lokasi[faker.number.int({ min: 0, max: lokasi.length - 1 })].id;
-                const prior = mingguDetail?.prioritas || prioritas[`P${faker.number.int({ min: 1, max: 5 })}`];
-                let hole: string | null = null;
+                const title_task = mingguDetail?.title_task || `Task ${div.division} ${i + 1}`;
+                const id_location =
+                    mingguDetail?.id_location ||
+                    location[faker.number.int({ min: 0, max: location.length - 1 })].id;
 
-                if (mingguDetail?.hole) {
-                    hole = mingguDetail.hole; // copy from minggu_detail if exists
-                } else {
-                    // 50% chance to have a hole
-                    if (Math.random() < 0.5) {
-                        if (div.divisi === "Operasional" || div.divisi === "Landscape" || div.divisi === "Projek") {
-                            // generate random hole numbers 1-27, unordered
-                            const numHoles = faker.number.int({ min: 1, max: 5 });
-                            const holeNumbers: number[] = [];
-                            while (holeNumbers.length < numHoles) {
-                                const h = faker.number.int({ min: 1, max: 27 });
-                                if (!holeNumbers.includes(h)) holeNumbers.push(h);
-                            }
-                            // randomize chipping
-                            const chippingText = Math.random() < 0.5 ? " chipping" : "";
-                            hole = holeNumbers.sort((a, b) => a - b).join(", ") + chippingText;
+                const prior =
+                    mingguDetail?.priority ??
+                    priority[`P${faker.number.int({ min: 1, max: 5 })}` as keyof typeof priority];
 
-                            // occasionally use special places if divisi allows "All"
-                            if (Math.random() < 0.1) {
-                                const specialPlaces = ["Family Club", "Club House", "Teras"];
-                                hole = specialPlaces[faker.number.int({ min: 0, max: specialPlaces.length - 1 })];
-                            }
-                        }
-                    }
-                }
+                const hole = mingguDetail?.hole || (Math.random() < 0.5 ? `Hole ${faker.number.int({ min: 1, max: 27 })}` : null);
 
-                const keterangan = mingguDetail?.keterangan || faker.lorem.sentence();
+                const detail = mingguDetail?.detail || faker.lorem.sentence();
 
                 // tk_butuh / tk_tersedia / nama_tk
-                let tk_butuh;
-                let tk_tersedia;
-                let nama_tk;
+                let worker_need;
+                let worker_avail;
+                let worker_name;
                 if (hole) {
-                    tk_butuh = faker.number.int({ min: 1, max: 5 });
-                    tk_tersedia = faker.number.int({ min: 0, max: tk_butuh });
-                    nama_tk = Array.from({ length: tk_tersedia }).map(() => faker.person.fullName()).join(', ');
+                    worker_need = faker.number.int({ min: 1, max: 5 });
+                    worker_avail = faker.number.int({ min: 0, max: worker_need });
+                    worker_name = Array.from({ length: worker_avail })
+                        .map(() => faker.person.fullName())
+                        .join(', ');
                 } else {
-                    tk_butuh = null;
-                    tk_tersedia = null;
-                    nama_tk = null;
+                    worker_need = null;
+                    worker_avail = null;
+                    worker_name = null;
                 }
 
-                // Create harian_detail
-                const harian = await prisma.harian_detail.create({
+                const harian = await prisma.daily_detail.create({
                     data: {
-                        id_mingdet: mingguDetail?.id || null,
-                        title,
-                        id_lokasi,
-                        id_divisi: div.id,
-                        prioritas: prior,
+                        id_weekdet: mingguDetail?.id || null,
+                        title_task,
+                        id_location,
+                        id_division: div.id,
+                        priority: prior,
                         hole,
-                        tk_butuh,
-                        tk_tersedia,
-                        nama_tk,
-                        keterangan,
-                        url_foto: null,
-                        is_done: false,
+                        worker_need,
+                        worker_avail,
+                        worker_name,
+                        detail,
+                        url_photo: null,
+                        is_done: mingguDetail?.is_done ?? (Math.random() < 0.3)
                     },
                 });
 
-                // Create bridge
-                await prisma.bridge_laphar_hardet.create({
+                await prisma.bridge_dailyrep_dailydet.create({
                     data: {
-                        id_laphar: lapHar.id,
-                        id_hardet: harian.id,
+                        id_dailyrep: lapHar.id,
+                        id_dailydet: harian.id,
                     },
                 });
             }
