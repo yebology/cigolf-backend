@@ -49,28 +49,16 @@ export class WeeklyPlanRepository {
     });
   }
 
-  async findWeeklyDetail(id: number) {
-    return await prisma.weekly_detail.findMany({
-      where: {
-        id: id,
-      },
-    });
-  }
-
   async findWeeklyDetails(id: number) {
-    const detailList = await prisma.bridge_weekrep_weekdet.findMany({
-      where: {
-        weekrep_id: id,
+    return await prisma.weekly_report.findUnique({
+      where: { id },
+      include: {
+        bridge_weekrep_weekdet: {
+          include: {
+            weekly_detail: true,
+          },
+        },
       },
     });
-    const detail = [];
-
-    for (const item of detailList) {
-      const detailData = await this.findWeeklyDetail(item.weekdet_id ?? 0);
-      if (detailData) {
-        detail.push(...detailData);
-      }
-    }
-    return detail;
   }
 }
