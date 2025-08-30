@@ -21,7 +21,7 @@ CREATE TABLE "public"."weekly_detail" (
     "start_date" DATE DEFAULT CURRENT_TIMESTAMP,
     "hole" VARCHAR(255),
     "detail" TEXT,
-    "is_done" BOOLEAN DEFAULT false,
+    "is_done" BOOLEAN,
     "created_at" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "weekly_detail_pkey" PRIMARY KEY ("id")

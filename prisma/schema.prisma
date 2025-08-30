@@ -17,7 +17,7 @@ model weekly_detail {
   start_date             DateTime?                @default(now()) @db.Date
   hole                   String?                  @db.VarChar(255)
   detail                 String?
-  is_done                Boolean?                 @default(false)
+  is_done                Boolean?
   created_at             DateTime?                @default(now()) @db.Timestamp(6)
   bridge_weekrep_weekdet bridge_weekrep_weekdet[]
   daily_detail           daily_detail[]
