@@ -50,7 +50,7 @@ export class WeeklyPlanRepository {
   }
 
   async findWeeklyDetails(id: number) {
-    return await prisma.weekly_report.findUnique({
+    const report = await prisma.weekly_report.findUnique({
       where: { id },
       include: {
         bridge_weekrep_weekdet: {
@@ -60,6 +60,17 @@ export class WeeklyPlanRepository {
         },
       },
     });
+
+    if (!report) return null;
+
+    const details = report.bridge_weekrep_weekdet.map((b) => b.weekly_detail);
+
+    return {
+      id: report.id,
+      start_date: report.start_date,
+      end_date: report.end_date,
+      details,
+    };
   }
 
   async createWeeklyPlan(data: {
