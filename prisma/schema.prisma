@@ -13,7 +13,6 @@ model weekly_detail {
   title_task             String
   location_id            Int
   division_id            Int
-  priority               priority                 @default(P3)
   start_date             DateTime?                @default(now()) @db.Date
   hole                   String?                  @db.VarChar(255)
   detail                 String?
