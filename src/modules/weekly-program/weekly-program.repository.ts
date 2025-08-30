@@ -87,41 +87,7 @@ export class WeeklyPlanRepository {
       is_done?: boolean | null;
     }[];
   }) {
-    return prisma.weekly_report.create({
-      data: {
-        start_date: new Date(data.start_date),
-        end_date: new Date(data.end_date),
-        bridge_weekrep_weekdet: {
-          create: data.details.map((d) => {
-            const startDate = d.start_date ? new Date(d.start_date) : null;
-            let isDone: boolean | null = null;
-            if (startDate !== null) {
-              isDone = d.is_done ?? false;
-            }
-
-            return {
-              weekly_detail: {
-                create: {
-                  title_task: d.title_task,
-                  location_id: d.location_id,
-                  division_id: d.division_id,
-                  priority: d.priority as priority,
-                  start_date: startDate,
-                  hole: d.hole ?? null,
-                  detail: d.detail,
-                  is_done: isDone,
-                },
-              },
-            };
-          })
-        },
-      },
-      include: {
-        bridge_weekrep_weekdet: { include: { weekly_detail: true } },
-      },
-    });
-
-    // await prisma.weekly_report.create({
+    // return prisma.weekly_report.create({
     //   data: {
     //     start_date: new Date(data.start_date),
     //     end_date: new Date(data.end_date),
@@ -150,8 +116,42 @@ export class WeeklyPlanRepository {
     //       })
     //     },
     //   },
+    //   include: {
+    //     bridge_weekrep_weekdet: { include: { weekly_detail: true } },
+    //   },
     // });
 
-    // return { message: "New weekly report has been created successfully." };
+    await prisma.weekly_report.create({
+      data: {
+        start_date: new Date(data.start_date),
+        end_date: new Date(data.end_date),
+        bridge_weekrep_weekdet: {
+          create: data.details.map((d) => {
+            const startDate = d.start_date ? new Date(d.start_date) : null;
+            let isDone: boolean | null = null;
+            if (startDate !== null) {
+              isDone = d.is_done ?? false;
+            }
+
+            return {
+              weekly_detail: {
+                create: {
+                  title_task: d.title_task,
+                  location_id: d.location_id,
+                  division_id: d.division_id,
+                  priority: d.priority as priority,
+                  start_date: startDate,
+                  hole: d.hole ?? null,
+                  detail: d.detail,
+                  is_done: isDone,
+                },
+              },
+            };
+          })
+        },
+      },
+    });
+
+    return { message: "New weekly report has been created successfully." };
   }
 }

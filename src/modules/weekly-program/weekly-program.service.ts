@@ -30,6 +30,10 @@ export class WeeklyPlanService {
   }
 
   async createWeeklyPlan(data: any) {
-    return await repo.createWeeklyPlan(data);
+    const result = await repo.createWeeklyPlan(data);
+
+    return {
+      message: result.message
+    };
   }
 }
