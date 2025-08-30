@@ -17,7 +17,6 @@ CREATE TABLE "public"."weekly_detail" (
     "title_task" TEXT NOT NULL,
     "location_id" INTEGER NOT NULL,
     "division_id" INTEGER NOT NULL,
-    "priority" "public"."priority" NOT NULL DEFAULT 'P3',
     "start_date" DATE DEFAULT CURRENT_TIMESTAMP,
     "hole" VARCHAR(255),
     "detail" TEXT,

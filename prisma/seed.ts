@@ -244,7 +244,6 @@ async function main() {
                 division_id: division.id,
                 location_id:
                     locationoption.find(l => l.location === location?.location)?.id || locationoption[0].id,
-                priority: priority[`P${faker.number.int({ min: 1, max: 5 })}` as keyof typeof priority], // ensure it's typed correctly
                 start_date,
                 hole,
                 detail: `detail untuk task ${i + 1}`,
@@ -337,9 +336,7 @@ async function main() {
                     weeklyDetail?.location_id ||
                     location[faker.number.int({ min: 0, max: location.length - 1 })].id;
 
-                const prior =
-                    weeklyDetail?.priority ??
-                    priority[`P${faker.number.int({ min: 1, max: 5 })}` as keyof typeof priority];
+                const prior = priority[`P${faker.number.int({ min: 1, max: 5 })}` as keyof typeof priority];
 
                 const hole = weeklyDetail?.hole || (Math.random() < 0.5 ? `Hole ${faker.number.int({ min: 1, max: 27 })}` : null);
 
