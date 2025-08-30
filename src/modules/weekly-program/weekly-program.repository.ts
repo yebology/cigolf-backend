@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, priority } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -58,6 +58,55 @@ export class WeeklyPlanRepository {
             weekly_detail: true,
           },
         },
+      },
+    });
+  }
+
+  async createWeeklyPlan(data: {
+    start_date: string;
+    end_date: string;
+    details: {
+      title_task: string;
+      location_id: number;
+      division_id: number;
+      priority: string;
+      start_date?: string;
+      hole?: string;
+      detail?: string;
+      is_done?: boolean | null;
+    }[];
+  }) {
+    return prisma.weekly_report.create({
+      data: {
+        start_date: new Date(data.start_date),
+        end_date: new Date(data.end_date),
+        bridge_weekrep_weekdet: {
+          create: data.details.map((d) => {
+            const startDate = d.start_date ? new Date(d.start_date) : null;
+            let isDone: boolean | null = null;
+            if (startDate !== null) {
+              isDone = d.is_done ?? false;
+            }
+
+            return {
+              weekly_detail: {
+                create: {
+                  title_task: d.title_task,
+                  location_id: d.location_id,
+                  division_id: d.division_id,
+                  priority: d.priority as priority,
+                  start_date: startDate,
+                  hole: d.hole ?? null,
+                  detail: d.detail,
+                  is_done: isDone,
+                },
+              },
+            };
+          })
+        },
+      },
+      include: {
+        bridge_weekrep_weekdet: { include: { weekly_detail: true } },
       },
     });
   }
