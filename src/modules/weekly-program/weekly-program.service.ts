@@ -28,4 +28,8 @@ export class WeeklyPlanService {
 
     return detail;
   }
+
+  async createWeeklyPlan(data: any) {
+    return await repo.createWeeklyPlan(data);
+  }
 }

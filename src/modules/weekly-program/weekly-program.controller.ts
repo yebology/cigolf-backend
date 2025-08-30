@@ -47,3 +47,12 @@ export const getWeeklyPlanDetails = async (req: Request, res: Response) => {
       .json({ status: "error", message: (error as Error).message });
   }
 };
+
+export async function createWeeklyPlan(req: Request, res: Response) {
+  try {
+    const result = await service.createWeeklyPlan(req.body);
+    res.status(201).json(result);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+}
