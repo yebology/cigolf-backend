@@ -67,8 +67,8 @@ export class WeeklyPlanRepository {
 
     return {
       id: report.id,
-      start_date: report.start_date,
-      end_date: report.end_date,
+      start_date: report.start_date.toLocaleDateString("id-ID"),
+      end_date: report.end_date.toLocaleDateString("id-ID"),
       details,
     };
   }
