@@ -32,7 +32,6 @@ export const getWeeklyPlanHistories = async (req: Request, res: Response) => {
 export const getWeeklyPlanDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    console.log(id);
 
     const result = await service.getWeeklyPlanDetails(id);
 

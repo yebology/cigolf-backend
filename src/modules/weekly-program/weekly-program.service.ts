@@ -20,7 +20,6 @@ export class WeeklyPlanService {
 
   async getWeeklyPlanDetails(id: string) {
     const detail = await repo.findWeeklyDetails(Number(id));
-    console.log(detail);
 
     if (!detail) {
       throw new Error("The requested resource was not found.");

@@ -8,9 +8,13 @@ export class UserService {
   async login(username: string, password: string) {
     const user = await repo.findByUsername(username);
 
+    if (!user) {
+      throw new Error("Invalid username or password.");
+    }
+
     const isValid = await bcrypt.compare(password, user!.password_hash);
 
-    if (!user || !isValid) {
+    if (!isValid) {
       throw new Error("Invalid username or password.");
     }
 
