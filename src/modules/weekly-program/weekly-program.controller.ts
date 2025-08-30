@@ -29,21 +29,21 @@ export const getWeeklyPlanHistories = async (req: Request, res: Response) => {
   }
 };
 
-// export const getWeeklyPlanDetail = async (req: Request, res: Response) => {
-//   try {
-//     const id = req.params.id;
-//     console.log(id);
+export const getWeeklyPlanDetails = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    console.log(id);
 
-//     const result = await service.getWeeklyPlanDetail(id);
+    const result = await service.getWeeklyPlanDetails(id);
 
-//     res.json({
-//       status: "success",
-//       message: "Weekly plan fetch successfuly.",
-//       data: result,
-//     });
-//   } catch (error) {
-//     res
-//       .status(401)
-//       .json({ status: "error", message: (error as Error).message });
-//   }
-// };
+    res.json({
+      status: "success",
+      message: "Weekly plan fetch successfuly.",
+      data: result,
+    });
+  } catch (error) {
+    res
+      .status(401)
+      .json({ status: "error", message: (error as Error).message });
+  }
+};

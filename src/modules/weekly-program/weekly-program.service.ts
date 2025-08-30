@@ -18,14 +18,14 @@ export class WeeklyPlanService {
     return histories;
   }
 
-  // async getWeeklyPlanDetail(id: string) {
-  //   const detail = await repo.findDetail(Number(id));
-  //   console.log(detail);
+  async getWeeklyPlanDetails(id: string) {
+    const detail = await repo.findWeeklyDetails(Number(id));
+    console.log(detail);
 
-  //   if (!detail) {
-  //     throw new Error("The requested resource was not found.");
-  //   }
+    if (!detail) {
+      throw new Error("The requested resource was not found.");
+    }
 
-  //   return detail;
-  // }
+    return detail;
+  }
 }
