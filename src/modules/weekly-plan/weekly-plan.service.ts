@@ -1,38 +1,40 @@
-import { WeeklyPlanRepository } from "./weekly-program.repository";
+import { WeeklyPlanRepository } from "./weekly-plan.repository";
 
 const repo = new WeeklyPlanRepository();
 
 export class WeeklyPlanService {
   async getWeeklyPlanHistories() {
-    const histories = await repo.findAll();
-    return histories;
+    const result = await repo.findAll();
+    return result;
   }
 
   async getFilteredWeeklyPlanHistories(start_at: string, end_at: string) {
-    const histories = await repo.findByDateRange(start_at, end_at);
+    const result = await repo.findByDateRange(start_at, end_at);
 
-    if (!histories || histories.length === 0) {
+    if (!result || result.length === 0) {
       throw new Error("invalid params");
     }
 
-    return histories;
+    return result;
   }
 
   async getWeeklyPlanDetails(id: string) {
-    const detail = await repo.findWeeklyDetails(Number(id));
+    const result = await repo.findWeeklyDetails(Number(id));
 
-    if (!detail) {
+    if (!result) {
       throw new Error("The requested resource was not found.");
     }
 
-    return detail;
+    return result;
   }
 
   async createWeeklyPlan(data: any) {
     const result = await repo.createWeeklyPlan(data);
 
-    return {
-      message: result.message
-    };
+    if (!result.success) {
+      throw new Error("The given data was invalid.")
+    }
+
+    return result;
   }
 }

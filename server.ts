@@ -1,10 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
-import path from "path";
 import userRoutes from "./src/modules/user/user.routes";
-import weeklyPlanRoutes from "./src/modules/weekly-program/weekly-program.routes";
-
+import weeklyPlanRoutes from "./src/modules/weekly-plan/weekly-plan.routes";
+import dailyPlanRoutes from "./src/modules/daily-plan/daily.plan.routes";
 
 dotenv.config();
 
@@ -21,8 +20,9 @@ app.use(express.json());
 
 app.use(`/api/${VERSION}`, userRoutes);
 app.use(`/api/${VERSION}/weekly-plan`, weeklyPlanRoutes)
+app.use(`/api/${VERSION}/foreman`, dailyPlanRoutes)
 
-app.get("/health", async (req, res) => {
+app.get("/health", async (_, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`; // query sederhana ke Postgres
     res.json({ status: "ok", message: "Connected to Postgres" });

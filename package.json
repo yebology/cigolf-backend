@@ -33,6 +33,7 @@
     "@prisma/client": "^6.15.0",
     "bcrypt": "^6.0.0",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.18",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.16.3"
   },

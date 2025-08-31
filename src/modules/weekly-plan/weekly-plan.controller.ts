@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
-import { WeeklyPlanService } from "./weekly-program.service";
-import { filterWeeklyPlanAttributes } from "./weekly-program.helper";
+import { WeeklyPlanService } from "./weekly-plan.service";
+import { filterWeeklyPlanAttributes } from "./weekly-plan.helper";
 
 const service = new WeeklyPlanService();
 
@@ -15,8 +15,8 @@ export const getWeeklyPlanHistories = async (req: Request, res: Response) => {
       );
     } else {
       result = await service.getWeeklyPlanHistories();
-      console.log(result);
     }
+
     res.json({
       status: "success",
       message: "Weekly plan fetch successfuly.",
@@ -32,7 +32,6 @@ export const getWeeklyPlanHistories = async (req: Request, res: Response) => {
 export const getWeeklyPlanDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-
     const result = await service.getWeeklyPlanDetails(id);
 
     res.json({
@@ -47,11 +46,30 @@ export const getWeeklyPlanDetails = async (req: Request, res: Response) => {
   }
 };
 
-export async function createWeeklyPlan(req: Request, res: Response) {
+export const createWeeklyPlan = async (req: Request, res: Response) => {
   try {
-    const result = await service.createWeeklyPlan(req.body);
-    res.status(201).json(result);
-  } catch (error: any) {
-    res.status(400).json({ error: error.message });
+    await service.createWeeklyPlan(req.body);
+
+    res.json({
+      status: "success",
+      message: "Weekly plan successfully created",
+    });
+  } catch (error) {
+    res.status(422).json({
+      status: "error",
+      message: (error as Error).message,
+      errors: [
+        {
+          day: ["day must be in english"],
+        },
+      ],
+    });
   }
-}
+};
+
+export const exportFile = async (req: Request, res: Response) => {
+  try {
+    const { type, weekly_ids } = req.query;
+    // const result =
+  } catch (error) {}
+};
