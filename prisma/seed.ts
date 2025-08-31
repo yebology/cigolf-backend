@@ -77,9 +77,9 @@ async function main() {
     // -MARK: foremans
     await prisma.foreman.createMany({
         data: [
-            { region_id: 1, user_id: 6 },
-            { region_id: 2, user_id: 7 },
-            { region_id: 3, user_id: 8 },
+            { region_id: 1, user_id: 6, company: faker.company.name() },
+            { region_id: 2, user_id: 7, company: faker.company.name() },
+            { region_id: 3, user_id: 8, company: faker.company.name() },
         ],
         skipDuplicates: true,
     })
@@ -124,6 +124,9 @@ async function main() {
     });
 
     const startDate = new Date('2025-01-01');
+    const users = await prisma.user.findMany({
+        where: { role_id: 2 },
+    });
     for (let i = 0; i < 30; i++) {
         const date = addDays(startDate, i);
         const foreman = foremans[i % foremans.length]; // cycle through foremans
@@ -134,6 +137,8 @@ async function main() {
                 region_id: foreman.region_id,
                 date,
                 is_approved: i < 20,
+                approved_at: i < 20 ? addDays(date, 0) : null,
+                approved_by: i < 20 ? users[i % users.length].name : null, 
             },
         });
     }

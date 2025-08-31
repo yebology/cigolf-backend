@@ -6,6 +6,7 @@ CREATE TABLE "public"."foreman" (
     "id" SERIAL NOT NULL,
     "user_id" INTEGER NOT NULL,
     "region_id" INTEGER NOT NULL,
+    "company" VARCHAR(255),
     "created_at" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "foreman_pkey" PRIMARY KEY ("id")
@@ -20,7 +21,7 @@ CREATE TABLE "public"."weekly_detail" (
     "start_date" DATE DEFAULT CURRENT_TIMESTAMP,
     "hole" VARCHAR(255),
     "detail" TEXT,
-    "is_done" BOOLEAN DEFAULT false,
+    "is_done" BOOLEAN,
     "created_at" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "weekly_detail_pkey" PRIMARY KEY ("id")
@@ -106,6 +107,8 @@ CREATE TABLE "public"."daily_report" (
     "date" DATE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "region_id" INTEGER NOT NULL,
     "is_approved" BOOLEAN NOT NULL DEFAULT false,
+    "approved_at" DATE,
+    "approved_by" VARCHAR(255),
     "created_at" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "daily_report_pkey" PRIMARY KEY ("id")
