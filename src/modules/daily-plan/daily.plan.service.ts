@@ -27,4 +27,22 @@ export class DailyPlanService {
     const result = await repo.findAllDivisionDailyPlan(foremanId);
     return result;
   }
+
+  async filteredAllDivisionDailyPlan(
+    foremanId: number,
+    startAt: string,
+    endAt: string
+  ) {
+    const result = await repo.findFilteredAllDivisionDailyPlan(
+      foremanId,
+      startAt,
+      endAt
+    );
+
+    if (!result || result.length === 0) {
+      throw new Error("invalid params");
+    }
+    
+    return result;
+  }
 }

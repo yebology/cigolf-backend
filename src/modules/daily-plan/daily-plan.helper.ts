@@ -31,6 +31,11 @@ export const formatDateRange = (dailyReports: any) => {
   return formatted;
 };
 
+export const convertToISO = (dateStr: string) => {
+  const [day, month, year] = dateStr.split("-");
+  return `${year}-${month}-${day}`;
+};
+
 export const findForeman = async (foremanId: number) => {
   return await prisma.foreman.findFirst({
     where: {

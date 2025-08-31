@@ -1,5 +1,5 @@
 import { PrismaClient, type weekly_report } from "@prisma/client";
-import { parse, addDays, format } from "date-fns";
+import { parse, addDays } from "date-fns";
 
 const prisma = new PrismaClient();
 
@@ -7,6 +7,11 @@ export const parseDate = (input: string) => {
   const [day, month, year] = input.split("-").map(Number);
   return new Date(year, month - 1, day);
 };
+
+export const convertToISO = (dateStr: string) => {
+  const [day, month, year] = dateStr.split('-');
+  return `${year}-${month}-${day}`;
+}
 
 export const filterWeeklyPlanAttributes = (histories: weekly_report[]) => {
   return histories.map((history: weekly_report) => ({

@@ -8,8 +8,8 @@ export class WeeklyPlanService {
     return result;
   }
 
-  async getFilteredWeeklyPlanHistories(start_at: string, end_at: string) {
-    const result = await repo.findByDateRange(start_at, end_at);
+  async getFilteredWeeklyPlanHistories(startAt: string, endAt: string) {
+    const result = await repo.findByDateRange(startAt, endAt);
 
     if (!result || result.length === 0) {
       throw new Error("invalid params");

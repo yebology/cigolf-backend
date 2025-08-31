@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import {
   calculateTaskStats,
+  convertToISO,
   findForeman,
   formatDateRange,
   getDailyReport,
@@ -81,6 +82,24 @@ export class DailyPlanRepository {
         date: {
           gte: startDate,
           lte: endDate,
+        },
+      },
+    });
+
+    return formatDateRange(dailyReport);
+  }
+
+  async findFilteredAllDivisionDailyPlan(
+    foremanId: number,
+    startAt: string,
+    endAt: string
+  ) {
+    const dailyReport = await prisma.daily_report.findMany({
+      where: {
+        foreman_id: foremanId,
+        date: {
+          gte: new Date(convertToISO(startAt)),
+          lte: new Date(convertToISO(endAt)),
         },
       },
     });

@@ -13,17 +13,21 @@ export const getWeeklyPlanHistories = async (req: Request, res: Response) => {
         start_at.toString(),
         end_at.toString()
       );
-    } else {
+    } else if (!start_at && !end_at) {
       result = await service.getWeeklyPlanHistories();
+    } else {
+      return res
+        .status(422)
+        .json({ status: "error", message: "invalid params" });
     }
 
-    res.json({
+    return res.json({
       status: "success",
       message: "Weekly plan fetch successfuly.",
       data: filterWeeklyPlanAttributes(result),
     });
   } catch (error) {
-    res
+    return res
       .status(422)
       .json({ status: "error", message: (error as Error).message });
   }

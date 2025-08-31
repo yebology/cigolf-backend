@@ -13,12 +13,12 @@ router.get(
   verifyRole(["Supervisor", "Admin", "Mandor"]),
   getDivisionDailyTaskPlanByDay
 );
-router.get(`/:foreman_id/daily-task`, verifyToken, getAllDivisionDailyPlan);
 router.get(
   `/:foreman_id/daily-task/:task_id`,
   verifyToken,
   verifyRole(["Supervisor", "Admin", "Mandor"]),
   getDailyTaskPlan
 );
+router.get(`/:foreman_id/daily-task`, verifyToken, getAllDivisionDailyPlan);
 
 export default router;

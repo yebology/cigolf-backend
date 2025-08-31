@@ -1,5 +1,13 @@
 import { PrismaClient } from "@prisma/client";
-import { extractTasks, formatDateFromDay, formatWeeklyReport, getWeeklyReportWithDetails, groupTasksByDivisionAndLocation, parseDate } from "./weekly-plan.helper";
+import {
+  convertToISO,
+  extractTasks,
+  formatDateFromDay,
+  formatWeeklyReport,
+  getWeeklyReportWithDetails,
+  groupTasksByDivisionAndLocation,
+  parseDate,
+} from "./weekly-plan.helper";
 
 const prisma = new PrismaClient();
 
@@ -8,14 +16,14 @@ export class WeeklyPlanRepository {
     return await prisma.weekly_report.findMany();
   }
 
-  async findByDateRange(start_at: string, end_at: string) {
+  async findByDateRange(startAt: string, endAt: string) {
     return await prisma.weekly_report.findMany({
       where: {
         start_date: {
-          gte: new Date(start_at),
+          gte: new Date(convertToISO(startAt)),
         },
         end_date: {
-          lte: new Date(end_at),
+          lte: new Date(convertToISO(endAt)),
         },
       },
     });
