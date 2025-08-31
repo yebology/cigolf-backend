@@ -32,7 +32,7 @@ export class WeeklyPlanService {
     const result = await repo.createWeeklyPlan(data);
 
     if (!result.success) {
-      throw new Error("The given data was invalid.")
+      throw new Error("The given data was invalid.");
     }
 
     return result;

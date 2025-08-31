@@ -16,6 +16,15 @@ export class DailyPlanService {
   async divisionDailyTaskPlanByDay(foremanId: number) {
     const result = await repo.findDivisionDailyTaskPlanByDay(foremanId);
 
+    if (!result) {
+      throw new Error("Foreman not found");
+    }
+
+    return result;
+  }
+
+  async allDivisionDailyPlan(foremanId: number) {
+    const result = await repo.findAllDivisionDailyPlan(foremanId);
     return result;
   }
 }

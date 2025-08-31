@@ -22,12 +22,37 @@ export const getDailyTaskPlan = async (req: Request, res: Response) => {
   }
 };
 
-export const getDivisionDailyTaskPlanByDay = async (req: Request, res: Response) => {
-    try {
-        const { foreman_id } = req.params
-        const result = await service.divisionDailyTaskPlanByDay(Number(foreman_id))
+export const getDivisionDailyTaskPlanByDay = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { foreman_id } = req.params;
+    const result = await service.divisionDailyTaskPlanByDay(Number(foreman_id));
+    res.json({
+      status: "success",
+      message: "Fetch data success.",
+      data: result,
+    });
+  } catch (error) {
+    res
+      .status(404)
+      .json({ status: "error", message: (error as Error).message });
+  }
+};
 
-    } catch (error) {
-        
-    }
-}
+export const getAllDivisionDailyPlan = async (req: Request, res: Response) => {
+  try {
+    const { foreman_id } = req.params;
+    const result = await service.allDivisionDailyPlan(Number(foreman_id));
+    res.json({
+      status: "success",
+      message: "retrieve all of the last 7 day plans",
+      data: result,
+    });
+  } catch (error) {
+    res
+      .status(404)
+      .json({ status: "error", message: (error as Error).message });
+  }
+};
