@@ -40,17 +40,18 @@ model role {
 }
 
 model User {
-  id            Int       @id @default(autoincrement())
-  username      String    @unique @db.VarChar(50)
-  password_hash String    @map("password_hash")
-  name          String    @db.VarChar(255)
+  id            Int            @id @default(autoincrement())
+  username      String         @unique @db.VarChar(50)
+  password_hash String         @map("password_hash")
+  name          String         @db.VarChar(255)
   role_id       Int
-  phone_number  String    @db.VarChar(255)
-  email         String    @db.VarChar(100)
-  is_active     Boolean   @default(true)
-  created_at    DateTime? @default(now()) @db.Timestamp(6)
+  phone_number  String         @db.VarChar(255)
+  email         String         @db.VarChar(100)
+  is_active     Boolean        @default(true)
+  created_at    DateTime?      @default(now()) @db.Timestamp(6)
+  daily_report  daily_report[]
   foreman       foreman[]
-  role          role      @relation(fields: [role_id], references: [id], onDelete: NoAction, map: "fk_users_role")
+  role          role           @relation(fields: [role_id], references: [id], onDelete: NoAction, map: "fk_users_role")
 
   @@map("users")
 }
@@ -101,9 +102,10 @@ model daily_report {
   region_id                Int
   is_approved              Boolean                    @default(false)
   approved_at              DateTime?                  @db.Date
-  approved_by              String?                    @db.VarChar(255)
+  approved_by              Int?
   created_at               DateTime?                  @default(now()) @db.Timestamp(6)
   bridge_dailyrep_dailydet bridge_dailyrep_dailydet[]
+  users                    User?                      @relation(fields: [approved_by], references: [id], onDelete: NoAction, map: "fk_dailyrep_users")
   foreman                  foreman                    @relation(fields: [foreman_id], references: [id], onDelete: NoAction, map: "fk_laphar_foreman")
   region                   region                     @relation(fields: [region_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_laphar_region")
 }
