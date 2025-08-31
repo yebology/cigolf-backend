@@ -30,7 +30,8 @@ export const verifyToken = async (
     (req as any).user = decoded;
 
     next();
-  } catch (_) {
+  } catch (error) {
+    console.error(error);
     return handleTokenError(res);
   }
 };

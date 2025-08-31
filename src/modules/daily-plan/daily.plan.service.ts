@@ -1,3 +1,4 @@
+import { Request } from "express";
 import { DailyPlanRepository } from "./daily-plan.repository";
 
 const repo = new DailyPlanRepository();
@@ -42,7 +43,65 @@ export class DailyPlanService {
     if (!result || result.length === 0) {
       throw new Error("invalid params");
     }
-    
+
     return result;
+  }
+
+  async newDivisionDailyPlan(foremanId: number, req: Request) {
+    await repo.newDivisionDailyPlan(foremanId, req);
+  }
+
+  async approveForemanTodayTasks(
+    foremanId: number,
+    taskId: number,
+    spvId: number
+  ) {
+    await repo.approveForemanTodayTasks(foremanId, taskId, spvId);
+  }
+
+  async addForemanTask(
+    foremanId: number,
+    taskId: number,
+    divisionId: number,
+    locationId: number,
+    jobType: string,
+    area: string[],
+    priority: number,
+    description: string
+  ) {
+    await repo.addForemanTask(
+      foremanId,
+      taskId,
+      divisionId,
+      locationId,
+      jobType,
+      area,
+      priority,
+      description
+    );
+  }
+
+  async updateForemanTask(
+    foremanId: number,
+    dailyReportId: number,
+    taskId: number,
+    locationId: number,
+    area: string,
+    workerNeeded: number,
+    availableWorker: number,
+    workerNameList: string,
+    ImageAttachment: File
+  ) {
+    const result = await repo.updateForemanTask(
+      foremanId,
+      dailyReportId,
+      taskId,
+      locationId,
+      area,
+      workerNeeded,
+      availableWorker,
+      workerNameList,
+      ImageAttachment
+    );
   }
 }
