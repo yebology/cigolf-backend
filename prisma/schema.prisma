@@ -100,6 +100,8 @@ model daily_report {
   date                     DateTime                   @default(now()) @db.Date
   region_id                Int
   is_approved              Boolean                    @default(false)
+  approved_at              DateTime?                  @db.Date
+  approved_by              String?                    @db.VarChar(255)
   created_at               DateTime?                  @default(now()) @db.Timestamp(6)
   bridge_dailyrep_dailydet bridge_dailyrep_dailydet[]
   foreman                  foreman                    @relation(fields: [foreman_id], references: [id], onDelete: NoAction, map: "fk_laphar_foreman")
@@ -134,6 +136,7 @@ model foreman {
   id           Int            @id @default(autoincrement())
   user_id      Int
   region_id    Int
+  company      String?        @db.VarChar(255)
   created_at   DateTime?      @default(now()) @db.Timestamp(6)
   daily_report daily_report[]
   region       region         @relation(fields: [region_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_foreman_region")
