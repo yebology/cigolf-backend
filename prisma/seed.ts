@@ -138,7 +138,7 @@ async function main() {
                 date,
                 is_approved: i < 20,
                 approved_at: i < 20 ? addDays(date, 0) : null,
-                approved_by: i < 20 ? users[i % users.length].name : null, 
+                approved_by: i < 20 ? users[i % users.length].id : null, 
             },
         });
     }

@@ -108,7 +108,7 @@ CREATE TABLE "public"."daily_report" (
     "region_id" INTEGER NOT NULL,
     "is_approved" BOOLEAN NOT NULL DEFAULT false,
     "approved_at" DATE,
-    "approved_by" VARCHAR(255),
+    "approved_by" INTEGER,
     "created_at" TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "daily_report_pkey" PRIMARY KEY ("id")
@@ -186,3 +186,6 @@ ALTER TABLE "public"."daily_report" ADD CONSTRAINT "fk_laphar_foreman" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "public"."daily_report" ADD CONSTRAINT "fk_laphar_region" FOREIGN KEY ("region_id") REFERENCES "public"."region"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE "public"."daily_report" ADD CONSTRAINT "fk_dailyrep_users" FOREIGN KEY ("approved_by") REFERENCES "public"."users"("id") ON DELETE NO ACTION ON UPDATE CASCADE;
