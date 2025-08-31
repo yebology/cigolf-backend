@@ -67,7 +67,10 @@ export class DailyPlanService {
     jobType: string,
     area: string[],
     priority: number,
-    description: string
+    description: string,
+    workerNeeded?: number,
+    workerAvailable?: number,
+    workerNameList?: string[]
   ) {
     await repo.addForemanTask(
       foremanId,
@@ -77,7 +80,10 @@ export class DailyPlanService {
       jobType,
       area,
       priority,
-      description
+      description,
+      workerNeeded,
+      workerAvailable,
+      workerNameList
     );
   }
 

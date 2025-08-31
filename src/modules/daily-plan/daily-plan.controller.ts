@@ -121,8 +121,14 @@ export const approveForemanTodayTasks = async (req: Request, res: Response) => {
 export const addForemanTask = async (req: Request, res: Response) => {
   try {
     const { foreman_id, task_id } = req.params;
-    const { divisionId, locationId, jobType, area, priority, description } =
-      req.body;
+    const {
+      divisionId,
+      locationId,
+      jobType,
+      area,
+      priority,
+      description
+    } = req.body;
 
     await service.addForemanTask(
       Number(foreman_id),
@@ -138,6 +144,50 @@ export const addForemanTask = async (req: Request, res: Response) => {
       status: "success",
       message: "A new task for daily task has been added successfully",
     });
+  } catch (error) {
+    res.status(422).json({
+      status: "error",
+      message: "The given data was invalid.",
+      errors: {
+        priority: [(error as Error).message],
+      },
+    });
+  }
+};
+
+export const selfAddForemanTask = async (req: Request, res: Response) => {
+  try {
+    const { foreman_id, task_id } = req.params;
+    const {
+      divisionId,
+      locationId,
+      jobType,
+      area,
+      priority,
+      description,
+      workerNeeded,
+      workerAvailable,
+      workerNameList,
+    } = req.body;
+
+    await service.addForemanTask(
+      Number(foreman_id),
+      Number(task_id),
+      Number(divisionId),
+      Number(locationId),
+      jobType,
+      area as string[],
+      Number(priority),
+      description,
+      workerNeeded,
+      workerAvailable,
+      workerNameList
+    );
+    res.json({
+      status: "success",
+      message: "A new task for daily task has been added successfully",
+    });
+
   } catch (error) {
     res.status(422).json({
       status: "error",

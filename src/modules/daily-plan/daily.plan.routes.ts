@@ -13,6 +13,12 @@ import {
 const router = Router();
 
 router.post(
+  `/:foreman_id/daily-task/:task_id/self-add-new`,
+  verifyToken,
+  verifyRole(["Mandor"]),
+  addForemanTask
+);
+router.post(
   `/:foreman_id/daily-task/:task_id/add-new`,
   verifyToken,
   verifyRole(["Supervisor", "Admin"]),

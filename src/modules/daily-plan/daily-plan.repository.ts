@@ -187,7 +187,10 @@ export class DailyPlanRepository {
     jobType: string,
     area: string[],
     priority: number,
-    description: string
+    description: string,
+    workerNeeded?: number,
+    workerAvailable?: number,
+    workerNameList?: string[]
   ) {
     if (priority <= 0 || priority >= 6) {
       throw new Error("maximum cant more than 5");
@@ -208,6 +211,9 @@ export class DailyPlanRepository {
         priority: ("P" + priority!.toString()) as any,
         hole: area.join(", "),
         detail: description,
+        worker_need: workerNeeded || null,
+        worker_avail: workerAvailable || null,
+        worker_name: workerNameList?.join(", ") || null,
       },
     });
 
