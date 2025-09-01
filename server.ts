@@ -33,4 +33,6 @@ app.get("/health", async (_, res) => {
   }
 });
 
+console.log("REQUEST RECEIVED WITHOUT ROUTE");
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
