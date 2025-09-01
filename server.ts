@@ -18,6 +18,11 @@ const prisma = new PrismaClient();
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 app.use(`/api/${VERSION}`, userRoutes);
 app.use(`/api/${VERSION}/weekly-plan`, weeklyPlanRoutes)
 app.use(`/api/${VERSION}/foreman`, dailyPlanRoutes)

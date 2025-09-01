@@ -17,14 +17,26 @@ export class WeeklyPlanRepository {
   }
 
   async findByDateRange(startAt: string, endAt: string) {
+    // Parse dates directly from YYYY-MM-DD format
+    const startDate = new Date(startAt + 'T00:00:00.000Z');
+    const endDate = new Date(endAt + 'T23:59:59.999Z');
+    
+    // Validate dates before querying
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      throw new Error("Invalid date format provided");
+    }
+    
     return await prisma.weekly_report.findMany({
       where: {
         start_date: {
-          gte: new Date(convertToISO(startAt)),
+          gte: startDate,
         },
         end_date: {
-          lte: new Date(convertToISO(endAt)),
+          lte: endDate,
         },
+      },
+      orderBy: {
+        start_date: "asc",
       },
     });
   }
