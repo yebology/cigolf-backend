@@ -40,10 +40,6 @@ export class DailyPlanService {
       endAt
     );
 
-    if (!result || result.length === 0) {
-      throw new Error("invalid params");
-    }
-
     return result;
   }
 
