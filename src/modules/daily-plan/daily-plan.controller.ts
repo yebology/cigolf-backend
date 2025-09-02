@@ -121,14 +121,8 @@ export const approveForemanTodayTasks = async (req: Request, res: Response) => {
 export const addForemanTask = async (req: Request, res: Response) => {
   try {
     const { foreman_id, task_id } = req.params;
-    const {
-      divisionId,
-      locationId,
-      jobType,
-      area,
-      priority,
-      description
-    } = req.body;
+    const { divisionId, locationId, jobType, area, priority, description } =
+      req.body;
 
     await service.addForemanTask(
       Number(foreman_id),
@@ -187,7 +181,6 @@ export const selfAddForemanTask = async (req: Request, res: Response) => {
       status: "success",
       message: "A new task for daily task has been added successfully",
     });
-
   } catch (error) {
     res.status(422).json({
       status: "error",

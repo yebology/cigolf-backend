@@ -69,7 +69,7 @@ export class DailyPlanRepository {
   async findAllDivisionDailyPlan(foremanId: number) {
     const weeklyDailyReport = await prisma.weekly_report.findFirst({
       orderBy: {
-        id: "desc",
+        start_date: "desc",
       },
       take: 1,
     });
@@ -84,6 +84,9 @@ export class DailyPlanRepository {
           gte: startDate,
           lte: endDate,
         },
+      },
+      orderBy: {
+        date: "desc",
       },
     });
 
