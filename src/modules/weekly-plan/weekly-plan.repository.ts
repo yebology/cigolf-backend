@@ -6,6 +6,7 @@ import {
   formatWeeklyReport,
   getWeeklyReportWithDetails,
   groupTasksByDivisionAndLocation,
+  isValidDay,
   parseDate,
 } from "./weekly-plan.helper";
 
@@ -18,14 +19,14 @@ export class WeeklyPlanRepository {
 
   async findByDateRange(startAt: string, endAt: string) {
     // Parse dates directly from YYYY-MM-DD format
-    const startDate = new Date(startAt + 'T00:00:00.000Z');
-    const endDate = new Date(endAt + 'T23:59:59.999Z');
-    
+    const startDate = new Date(startAt + "T00:00:00.000Z");
+    const endDate = new Date(endAt + "T23:59:59.999Z");
+
     // Validate dates before querying
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       throw new Error("Invalid date format provided");
     }
-    
+
     return await prisma.weekly_report.findMany({
       where: {
         start_date: {
@@ -60,50 +61,45 @@ export class WeeklyPlanRepository {
   }
 
   async createWeeklyPlan(data: any) {
-    try {
-      const weeklyReport = await prisma.weekly_report.create({
-        data: {
-          start_date: parseDate(data.startAt),
-          end_date: parseDate(data.endAt),
-        },
-      });
+    const hasInvalidDay = data.divisions.some((div: any) =>
+      div.locations.some((loc: any) =>
+        loc.tasks.some((task: any) => !isValidDay(task.day))
+      )
+    );
 
-      for (const div of data.divisions) {
-        for (const loc of div.locations) {
-          for (const task of loc.tasks) {
-            const weeklyDetail = await prisma.weekly_detail.create({
-              data: {
-                title_task: task.taskType,
-                location_id: loc.locationId,
-                start_date: formatDateFromDay(
-                  data.startAt,
-                  data.endAt,
-                  task.day
-                ),
-                division_id: div.id,
-                detail: task.description,
-                hole: task.Area.join(", "),
-              },
-            });
+    if (hasInvalidDay) {
+      throw new Error("day must be in english");
+    }
 
-            // const dailyReport = await prisma.daily_report.create({
-            //   data: {
+    const weeklyReport = await prisma.weekly_report.create({
+      data: {
+        start_date: parseDate(data.startAt),
+        end_date: parseDate(data.endAt),
+      },
+    });
 
-            //   }
-            // })
+    for (const div of data.divisions) {
+      for (const loc of div.locations) {
+        for (const task of loc.tasks) {
+          const weeklyDetail = await prisma.weekly_detail.create({
+            data: {
+              title_task: task.taskType,
+              location_id: loc.locationId,
+              start_date: formatDateFromDay(data.startAt, data.endAt, task.day),
+              division_id: div.id,
+              detail: task.description,
+              hole: task.Area.join(", "),
+            },
+          });
 
-            await prisma.bridge_weekrep_weekdet.create({
-              data: {
-                weekdet_id: weeklyDetail.id,
-                weekrep_id: weeklyReport.id,
-              },
-            });
-          }
+          await prisma.bridge_weekrep_weekdet.create({
+            data: {
+              weekdet_id: weeklyDetail.id,
+              weekrep_id: weeklyReport.id,
+            },
+          });
         }
       }
-      return { success: true };
-    } catch (_) {
-      return { success: false };
     }
   }
 }

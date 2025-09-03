@@ -3,15 +3,29 @@ import { parse, addDays } from "date-fns";
 
 const prisma = new PrismaClient();
 
+export const isValidDay = (day: String) => {
+  const days = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+
+  return days.includes(day.toLowerCase());
+};
+
 export const parseDate = (input: string) => {
   const [day, month, year] = input.split("-").map(Number);
   return new Date(year, month - 1, day);
 };
 
 export const convertToISO = (dateStr: string) => {
-  const [day, month, year] = dateStr.split('-');
+  const [day, month, year] = dateStr.split("-");
   return `${year}-${month}-${day}`;
-}
+};
 
 export const filterWeeklyPlanAttributes = (histories: weekly_report[]) => {
   return histories.map((history: weekly_report) => ({

@@ -29,12 +29,6 @@ export class WeeklyPlanService {
   }
 
   async createWeeklyPlan(data: any) {
-    const result = await repo.createWeeklyPlan(data);
-
-    if (!result.success) {
-      throw new Error("The given data was invalid.");
-    }
-
-    return result;
+    await repo.createWeeklyPlan(data);
   }
 }

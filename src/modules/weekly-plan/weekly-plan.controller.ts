@@ -61,10 +61,10 @@ export const createWeeklyPlan = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(422).json({
       status: "error",
-      message: (error as Error).message,
+      message: "The given data was invalid.",
       errors: [
         {
-          day: ["day must be in english"],
+          day: [(error as Error).message],
         },
       ],
     });
