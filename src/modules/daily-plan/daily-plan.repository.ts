@@ -206,6 +206,10 @@ export class DailyPlanRepository {
       },
     });
 
+    if (newDailyReport?.is_approved) {
+      throw new Error("Task already approved. Cannot add a new one.");
+    }
+
     const newDailyDetail = await prisma.daily_detail.create({
       data: {
         division_id: divisionId,
