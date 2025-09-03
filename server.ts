@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import userRoutes from "./src/modules/user/user.routes";
 import weeklyPlanRoutes from "./src/modules/weekly-plan/weekly-plan.routes";
@@ -15,6 +16,8 @@ console.log("ENVIRONMENT:", NODE_ENV);
 
 const app = express();
 const prisma = new PrismaClient();
+
+app.use(cors());
 
 app.use(express.json());
 
