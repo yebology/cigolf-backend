@@ -214,6 +214,12 @@ export const updateForemanTask = async (req: Request, res: Response) => {
       message: "a new task for daily task has been updated successfully",
     });
   } catch (error) {
-    console.error(error);
+    res.status(422).json({
+      status: "error",
+      message: "The given data was invalid.",
+      errors: {
+        area: [(error as Error).message],
+      },
+    });
   }
 };

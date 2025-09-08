@@ -5,6 +5,7 @@ import {
   findForeman,
   formatDateRange,
   getDailyReport,
+  isValidArea,
   mapTasksToDivisions,
   uploadImage,
 } from "./daily-plan.helper";
@@ -247,25 +248,50 @@ export class DailyPlanRepository {
     workerNameList: string,
     ImageAttachment?: Express.Multer.File
   ) {
+    const jsonArea = JSON.parse(area);
+    const jsonWorkerNameList = JSON.parse(workerNameList);
+
+    if (!isValidArea(jsonArea)) {
+      throw new Error("invalid area value");
+    }
+
     if (!ImageAttachment) {
       throw new Error("image not included!");
     }
 
-    uploadImage(ImageAttachment);
+    const imageUrl = await uploadImage(ImageAttachment);
 
-    console.log(ImageAttachment);
-    // const dailyDetail = await prisma.daily_detail.update({
-    //   where: {
-    //     id: taskId,
-    //   },
-    //   data: {
-    //     location_id: locationId,
-    //     hole: area,
-    //     worker_need: workerNeeded,
-    //     worker_avail: availableWorker,
-    //     worker_name: workerNameList,
-    //   },
-    // });
+    const dailyReport = await prisma.daily_report.findFirst({
+      where: {
+        foreman_id: foremanId,
+        id: dailyReportId,
+      },
+    });
+
+    const bridgeDaily = await prisma.bridge_dailyrep_dailydet.findFirst({
+      where: {
+        dailydet_id: taskId,
+        dailyrep_id: dailyReport!.id,
+      },
+    });
+
+    if (!bridgeDaily) {
+      throw Error("invalid task");
+    }
+
+    await prisma.daily_detail.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        location_id: Number(locationId), // pastikan Int
+        hole: JSON.stringify(jsonArea), // simpan array ke JSON
+        worker_need: Number(workerNeeded), // pastikan Int
+        worker_avail: Number(availableWorker), // pastikan Int
+        worker_name: jsonWorkerNameList.join(", "), // string biasa
+        url_photo: imageUrl, // dari Supabase
+      },
+    });
   }
 
   //   async findAll() {

@@ -5,6 +5,34 @@ const prisma = new PrismaClient();
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
 
+const supabase = createClient(
+  supabaseUrl,
+  supabaseAnonKey // pakai service key di backend
+);
+
+export const isValidArea = (areas: string[]) => {
+  const holes = Array.from({ length: 27 }, (_, i) => `Hole ${i + 1}`);
+
+  const extraAreas = [
+    "CH",
+    "FC",
+    "Villa",
+    "Main Gate",
+    "Driving Range",
+    "Parkiran",
+  ];
+
+  const availableAreas = [...holes, ...extraAreas];
+
+  for (const area of areas) {
+    if (!availableAreas.includes(area)) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
 export const formatDateRange = (dailyReports: any) => {
   const dayNames = [
     "sunday",
@@ -35,22 +63,21 @@ export const formatDateRange = (dailyReports: any) => {
 };
 
 export const uploadImage = async (image: Express.Multer.File) => {
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
   const fileName = `${Date.now()}_${image.originalname}`;
 
-  const { data: uploadData, error: uploadError } = await supabase.storage
+  const { data, error } = await supabase.storage
     .from("cigolf")
     .upload(fileName, image.buffer, {
       contentType: image.mimetype,
     });
 
-  if (uploadError) throw uploadError;
+  if (error) throw error;
 
   const { data: publicData } = supabase.storage
     .from("cigolf")
     .getPublicUrl(fileName);
 
-  console.log(publicData.publicUrl);
+  return publicData.publicUrl;
 };
 
 export const convertToISO = (dateStr: string) => {
