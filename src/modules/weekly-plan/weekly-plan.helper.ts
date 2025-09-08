@@ -40,6 +40,10 @@ export const formatDateFromDay = (
   endAt: string,
   day: string
 ) => {
+  if (!day) {
+    return null;
+  }
+
   const daysMap: { [key: string]: number } = {
     sunday: 0,
     monday: 1,

@@ -195,16 +195,10 @@ export const selfAddForemanTask = async (req: Request, res: Response) => {
 export const updateForemanTask = async (req: Request, res: Response) => {
   try {
     const { foreman_id, daily_report_id, task_id } = req.params;
-    const {
-      locationId,
-      area,
-      workerNeeded,
-      availableWorker,
-      workerNameList,
-      ImageAttachment,
-    } = req.body;
+    const { locationId, area, workerNeeded, availableWorker, workerNameList } =
+      req.body;
 
-    const result = await service.updateForemanTask(
+    await service.updateForemanTask(
       Number(foreman_id),
       Number(daily_report_id),
       Number(task_id),
@@ -213,7 +207,13 @@ export const updateForemanTask = async (req: Request, res: Response) => {
       workerNeeded,
       availableWorker,
       workerNameList,
-      ImageAttachment
+      req.file
     );
-  } catch (error) {}
+    res.json({
+      status: "success",
+      message: "a new task for daily task has been updated successfully",
+    });
+  } catch (error) {
+    console.error(error);
+  }
 };

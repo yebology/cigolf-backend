@@ -14,7 +14,11 @@ const prisma = new PrismaClient();
 
 export class WeeklyPlanRepository {
   async findAll() {
-    return await prisma.weekly_report.findMany();
+    return await prisma.weekly_report.findMany({
+      orderBy: {
+        start_date: "desc",
+      },
+    });
   }
 
   async findByDateRange(startAt: string, endAt: string) {
@@ -47,6 +51,9 @@ export class WeeklyPlanRepository {
       where: {
         id: id,
       },
+      orderBy: {
+        start_date: "desc",
+      },
     });
   }
 
@@ -63,7 +70,10 @@ export class WeeklyPlanRepository {
   async createWeeklyPlan(data: any) {
     const hasInvalidDay = data.divisions.some((div: any) =>
       div.locations.some((loc: any) =>
-        loc.tasks.some((task: any) => !isValidDay(task.day))
+        loc.tasks.some((task: any) => {
+          if (!task.day) return false;
+          return !isValidDay(task.day);
+        })
       )
     );
 

@@ -59,6 +59,7 @@ export const createWeeklyPlan = async (req: Request, res: Response) => {
       message: "Weekly plan successfully created",
     });
   } catch (error) {
+    console.log(error);
     res.status(422).json({
       status: "error",
       message: "The given data was invalid.",

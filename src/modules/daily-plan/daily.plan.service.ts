@@ -92,9 +92,9 @@ export class DailyPlanService {
     workerNeeded: number,
     availableWorker: number,
     workerNameList: string,
-    ImageAttachment: File
+    ImageAttachment?: Express.Multer.File
   ) {
-    const result = await repo.updateForemanTask(
+    await repo.updateForemanTask(
       foremanId,
       dailyReportId,
       taskId,

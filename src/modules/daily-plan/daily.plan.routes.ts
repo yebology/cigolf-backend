@@ -9,8 +9,10 @@ import {
   getDivisionDailyTaskPlanByDay,
   updateForemanTask,
 } from "./daily-plan.controller";
+import multer from "multer";
 
 const router = Router();
+const upload = multer();
 
 router.post(
   `/:foreman_id/daily-task/:task_id/self-add-new`,
@@ -38,7 +40,8 @@ router.post(
 );
 
 router.put(
-  `/:foreman_id/daily-task/:daily_report_id/update_task/:task_id`,
+  `/:foreman_id/daily-task/:daily_report_id/update-task/:task_id`,
+  upload.single("ImageAttachment"),
   verifyToken,
   verifyRole(["Supervisor", "Admin", "Mandor"]),
   updateForemanTask

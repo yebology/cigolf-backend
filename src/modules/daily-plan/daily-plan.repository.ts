@@ -6,6 +6,7 @@ import {
   formatDateRange,
   getDailyReport,
   mapTasksToDivisions,
+  uploadImage,
 } from "./daily-plan.helper";
 import { Request } from "express";
 
@@ -105,6 +106,9 @@ export class DailyPlanRepository {
           gte: new Date(convertToISO(startAt)),
           lte: new Date(convertToISO(endAt)),
         },
+      },
+      orderBy: {
+        date: "desc",
       },
     });
 
@@ -241,20 +245,27 @@ export class DailyPlanRepository {
     workerNeeded: number,
     availableWorker: number,
     workerNameList: string,
-    ImageAttachment: File
+    ImageAttachment?: Express.Multer.File
   ) {
-    const dailyDetail = await prisma.daily_detail.update({
-      where: {
-        id: taskId,
-      },
-      data: {
-        location_id: locationId,
-        hole: area,
-        worker_need: workerNeeded,
-        worker_avail: availableWorker,
-        worker_name: workerNameList,
-      },
-    });
+    if (!ImageAttachment) {
+      throw new Error("image not included!");
+    }
+
+    uploadImage(ImageAttachment);
+
+    console.log(ImageAttachment);
+    // const dailyDetail = await prisma.daily_detail.update({
+    //   where: {
+    //     id: taskId,
+    //   },
+    //   data: {
+    //     location_id: locationId,
+    //     hole: area,
+    //     worker_need: workerNeeded,
+    //     worker_avail: availableWorker,
+    //     worker_name: workerNameList,
+    //   },
+    // });
   }
 
   //   async findAll() {
