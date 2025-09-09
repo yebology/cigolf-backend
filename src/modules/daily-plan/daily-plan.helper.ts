@@ -33,6 +33,18 @@ export const isValidArea = (areas: string[]) => {
   return true;
 };
 
+export const formatDateUTC7 = (dateStr: string) => {
+  if (!dateStr) return "";
+  const date = new Date(dateStr + "T00:00:00Z");
+  const utc7Time = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+
+  const dd = String(utc7Time.getUTCDate()).padStart(2, "0");
+  const mm = String(utc7Time.getUTCMonth() + 1).padStart(2, "0");
+  const yyyy = utc7Time.getUTCFullYear();
+
+  return `${dd}-${mm}-${yyyy}`;
+};
+
 export const formatDateRange = (dailyReports: any) => {
   const dayNames = [
     "sunday",
@@ -73,6 +85,8 @@ export function flattenReport(report: any) {
           id: counter++,
           taskType: task?.taskType,
           description: task?.description,
+          division: division.name,
+          location: location.locationName,
           priority: task?.priority,
           area: Array.isArray(task?.area)
             ? task.area.join(", ")

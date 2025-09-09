@@ -127,7 +127,7 @@ export const exportFile = async (req: Request, res: Response) => {
       });
 
       if (type === "csv") {
-        archive.append(csv, { name: `Laporan Mingguan ${weeklyIds[idx]}.csv` });
+        archive.append(csv, { name: `Laporan Mingguan ${report.startAt}-${report.endAt}.csv` });
       } else if (type === "pdf") {
         const pdfBuffer = await generatePdfFromCsv(csv, weeklyIds[idx]);
         archive.append(pdfBuffer, {

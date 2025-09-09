@@ -4,6 +4,7 @@ import {
   convertToISO,
   findForeman,
   formatDateRange,
+  formatDateUTC7,
   getDailyReport,
   isValidArea,
   mapTasksToDivisions,
@@ -57,11 +58,12 @@ export class DailyPlanRepository {
 
         allReports.push({
           id: id,
-          createdAt: report!.created_at?.toISOString().split("T")[0],
+          date: formatDateUTC7(report!.date.toISOString().split("T")[0]),
+          createdAt: formatDateUTC7(report!.created_at!.toISOString().split("T")[0]),
           approved: {
             isApproved: report!.is_approved,
             approvedAt: report!.approved_at
-              ? report!.approved_at.toISOString().split("T")[0]
+              ? formatDateUTC7(report!.approved_at.toISOString().split("T")[0])
               : "",
             spvName: report!.users?.name || "",
           },

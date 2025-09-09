@@ -260,12 +260,29 @@ export const exportFile = async (req: Request, res: Response) => {
       const report = allReports![idx];
       const flat = flattenReport(report);
 
+      const metadataLines = [
+        `Mandor,${report?.foremanName ?? ""}`,
+        `Tanggal,${report?.createdAt ?? ""}`,
+        `Status,${report?.approved?.isApproved ? "Sudah di approve" : "Belum di approve"}`,
+      ];
+
+      if (report?.approved?.isApproved) {
+        metadataLines.push(
+          `Tanggal Approve,${report?.approved?.approvedAt ?? ""}`,
+          `Supervisor,${report?.approved?.spvName ?? ""}`
+        );
+      }
+
+      const csvMeta = metadataLines.join("\n");
+
       const csv = stringify(flat, {
         header: true,
         columns: {
           id: "No",
           taskType: "Jenis Pekerjaan",
           description: "Detail Pekerjaan",
+          division: "Divisi",
+          location: "Lokasi",
           priority: "Prioritas",
           area: "Area",
           needWorker: "Jumlah Pekerja yang Diperlukan",
@@ -276,8 +293,12 @@ export const exportFile = async (req: Request, res: Response) => {
         quoted: true,
       });
 
+      const finalCsv = `${csvMeta}\n${csv}`;
+
       if (type === "csv") {
-        archive.append(csv, { name: `Laporan Harian ${dailyIds[idx]}.csv` });
+        archive.append(finalCsv, {
+          name: `Laporan Harian ${report.date}.csv`,
+        });
       } else if (type === "pdf") {
         // const pdfBuffer = await generatePdfFromCsv(csv, weeklyIds[idx]);
         // archive.append(pdfBuffer, {
