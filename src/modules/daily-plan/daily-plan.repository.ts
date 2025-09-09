@@ -38,6 +38,43 @@ export class DailyPlanRepository {
     };
   }
 
+  async exportFile(foremanId: number, dailyIds: number[]) {
+    if (dailyIds.length == 0) {
+      throw new Error("");
+    }
+
+    let allReports: any[] = [];
+
+    for (const id of dailyIds) {
+      const foreman = await findForeman(foremanId);
+      const report = await getDailyReport(foremanId, id);
+
+      if (report) {
+        const tasks = report!.bridge_dailyrep_dailydet.map(
+          (b) => b.daily_detail
+        );
+        const divisions = mapTasksToDivisions(tasks);
+
+        allReports.push({
+          id: id,
+          createdAt: report!.created_at?.toISOString().split("T")[0],
+          approved: {
+            isApproved: report!.is_approved,
+            approvedAt: report!.approved_at
+              ? report!.approved_at.toISOString().split("T")[0]
+              : "",
+            spvName: report!.users?.name || "",
+          },
+          outsourceCompany: foreman?.company,
+          foremanName: foreman?.users.name,
+          divisions,
+        });
+      }
+    }
+
+    return allReports;
+  }
+
   async findDivisionDailyTaskPlanByDay(foremanId: number) {
     const foreman = await findForeman(foremanId);
     const report = await getDailyReport(foremanId);
@@ -295,7 +332,9 @@ export class DailyPlanRepository {
       },
       data: {
         location_id: Number(locationId),
-        hole: JSON.stringify(jsonArea),
+        hole: Array.isArray(jsonArea)
+          ? jsonArea.join(", ")
+          : String(jsonArea ?? ""),
         worker_need: Number(workerNeeded),
         worker_avail: Number(availableWorker),
         worker_name: jsonWorkerNameList.join(", "),

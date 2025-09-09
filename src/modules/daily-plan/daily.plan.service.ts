@@ -106,4 +106,10 @@ export class DailyPlanService {
       ImageAttachment
     );
   }
+
+  async exportFile(foremanId: number, dailyIds: number[]) {
+    const result = await repo.exportFile(foremanId, dailyIds);
+
+    return result;
+  }
 }

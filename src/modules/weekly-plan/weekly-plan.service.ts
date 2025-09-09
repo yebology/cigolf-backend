@@ -33,6 +33,8 @@ export class WeeklyPlanService {
   }
 
   async exportFile(weeklyIds: number[]) {
-    return await repo.exportFile(weeklyIds);
+    const result = await repo.exportFile(weeklyIds);
+
+    return result;
   }
 }

@@ -62,6 +62,35 @@ export const formatDateRange = (dailyReports: any) => {
   return formatted;
 };
 
+export function flattenReport(report: any) {
+  const rows: any[] = [];
+  let counter = 1;
+
+  report.divisions.forEach((division: any) => {
+    division.locations.forEach((location: any) => {
+      location.tasks.forEach((task: any) => {
+        rows.push({
+          id: counter++,
+          taskType: task?.taskType,
+          description: task?.description,
+          priority: task?.priority,
+          area: Array.isArray(task?.area)
+            ? task.area.join(", ")
+            : (task?.area ?? ""),
+          needWorker: task?.needWorker,
+          availableWorker: task?.availableWorker,
+          workerList: Array.isArray(task?.workerList)
+            ? task.workerList.join(", ")
+            : (task?.workerList ?? ""),
+          isFinished: task?.isFinished ? "Selesai" : "Belum Selesai",
+        });
+      });
+    });
+  });
+
+  return rows;
+}
+
 export const uploadImage = async (image: Express.Multer.File) => {
   const fileName = `${Date.now()}_${image.originalname}`;
 

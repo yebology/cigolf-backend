@@ -4,6 +4,7 @@ import {
   addForemanTask,
   approveForemanTodayTasks,
   createNewDivisionDailyPlan,
+  exportFile,
   getAllDivisionDailyPlan,
   getDailyTaskPlan,
   getDivisionDailyTaskPlanByDay,
@@ -52,6 +53,12 @@ router.get(
   verifyToken,
   verifyRole(["Supervisor", "Admin", "Mandor"]),
   getDivisionDailyTaskPlanByDay
+);
+router.get(
+  `/:foreman_id/daily-task/export`,
+  verifyToken,
+  verifyRole(["Supervisor", "Admin", "Mandor"]),
+  exportFile
 );
 router.get(
   `/:foreman_id/daily-task/:task_id`,

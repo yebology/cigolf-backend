@@ -1,5 +1,8 @@
 import { PrismaClient, type weekly_report } from "@prisma/client";
 import { parse, addDays } from "date-fns";
+import PDFDocument from "pdfkit";
+import { parse as parseCsv } from "csv-parse/sync";
+import PDFTable from "pdfkit-table";
 
 const prisma = new PrismaClient();
 
@@ -201,4 +204,58 @@ export function flattenReport(report: any) {
   });
 
   return rows;
+}
+
+export async function generatePdfFromCsv(
+  csv: string,
+  weeklyId: number
+): Promise<Buffer> {
+  return new Promise(async (resolve) => {
+    const doc = new PDFDocument({ margin: 30, size: "A4" });
+    const buffers: Buffer[] = [];
+
+    doc.on("data", (chunk) => buffers.push(chunk));
+    doc.on("end", () => resolve(Buffer.concat(buffers)));
+
+    doc.fontSize(16).text(`Laporan Mingguan ${weeklyId}`, { align: "center" });
+    doc.moveDown();
+
+    // Parse CSV
+    const records = parseCsv(csv, {
+      columns: true,
+      skip_empty_lines: true,
+      relax_quotes: true,
+      relax_column_count: true,
+    });
+
+    if (records.length === 0) {
+      doc.text("Tidak ada data.");
+      doc.end();
+      return;
+    }
+
+    // Buat header dan data
+    const headers = Object.keys(records[0]!).map((h) => ({
+      label: h,
+      property: h,
+      width: 100,
+    }));
+
+    const datas = records.map((row: any) => ({ ...row }));
+
+    console.log("headers:", headers);
+    console.log("datas:", datas);
+
+    // ⬇️ hanya sekali panggil
+    await (doc as any).table(
+      { headers, datas },
+      {
+        prepareHeader: () => doc.font("Helvetica-Bold").fontSize(10),
+        prepareRow: () => doc.font("Helvetica").fontSize(9),
+      }
+    );
+
+    // Tutup dokumen setelah table selesai
+    doc.end();
+  });
 }

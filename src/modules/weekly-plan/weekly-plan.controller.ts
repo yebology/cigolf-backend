@@ -3,10 +3,10 @@ import { WeeklyPlanService } from "./weekly-plan.service";
 import {
   filterWeeklyPlanAttributes,
   flattenReport,
+  generatePdfFromCsv,
 } from "./weekly-plan.helper";
 import archiver from "archiver";
 import { stringify } from "csv-stringify/sync";
-import PDFDocument from "pdfkit";
 
 const service = new WeeklyPlanService();
 
@@ -87,8 +87,12 @@ export const exportFile = async (req: Request, res: Response) => {
       try {
         weeklyIds = JSON.parse(weekly_ids);
       } catch (e) {
-        console.error("weekly_ids bukan JSON valid:", weekly_ids);
+        throw new Error("invalid json weekly ids");
       }
+    }
+
+    if (String(type) != "csv" && String(type) != "pdf") {
+      throw new Error("invalid type");
     }
 
     const allReports = await service.exportFile(weeklyIds);
@@ -106,74 +110,29 @@ export const exportFile = async (req: Request, res: Response) => {
       const report = allReports![idx];
       const flat = flattenReport(report);
 
+      const csv = stringify(flat, {
+        header: true,
+        columns: {
+          id: "No",
+          startAt: "Tanggal Mulai",
+          endAt: "Tanggal Selesai",
+          division: "Divisi",
+          location: "Lokasi",
+          taskType: "Tipe Tugas",
+          day: "Hari",
+          description: "Deskripsi",
+          area: "Area",
+        },
+        quoted: true,
+      });
+
       if (type === "csv") {
-        // === CSV ===
-        const csv = stringify(flat, {
-          header: true,
-          columns: {
-            id: "No",
-            startAt: "Tanggal Mulai",
-            endAt: "Tanggal Selesai",
-            division: "Divisi",
-            location: "Lokasi",
-            taskType: "Tipe Tugas",
-            day: "Hari",
-            description: "Deskripsi",
-            area: "Area",
-          },
-        });
         archive.append(csv, { name: `Laporan Mingguan ${weeklyIds[idx]}.csv` });
       } else if (type === "pdf") {
-        // === PDF ===
-        const doc = new PDFDocument({ margin: 30 });
-        const buffers: Buffer[] = [];
-
-        doc.on("data", (chunk) => buffers.push(chunk));
-        doc.on("end", () => {
-          const pdfBuffer = Buffer.concat(buffers);
-          archive.append(pdfBuffer, {
-            name: `Laporan Mingguan ${weeklyIds[idx]}.pdf`,
-          });
+        const pdfBuffer = await generatePdfFromCsv(csv, weeklyIds[idx]);
+        archive.append(pdfBuffer, {
+          name: `Laporan Mingguan ${weeklyIds[idx]}.pdf`,
         });
-
-        // Judul
-        doc.fontSize(16).text(`Laporan Mingguan ${weeklyIds[idx]}`, {
-          align: "center",
-        });
-        doc.moveDown();
-
-        // Header tabel
-        const headers = [
-          "No",
-          "Tanggal Mulai",
-          "Tanggal Selesai",
-          "Divisi",
-          "Lokasi",
-          "Tipe Tugas",
-          "Hari",
-          "Deskripsi",
-          "Area",
-        ];
-        doc.fontSize(12).text(headers.join(" | "));
-        doc.moveDown(0.5);
-
-        // Baris data
-        flat.forEach((row: any) => {
-          const line = [
-            row.id,
-            row.startAt,
-            row.endAt,
-            row.division,
-            row.location,
-            row.taskType,
-            row.day,
-            row.description,
-            row.area,
-          ].join(" | ");
-          doc.text(line);
-        });
-
-        doc.end();
       }
     }
 

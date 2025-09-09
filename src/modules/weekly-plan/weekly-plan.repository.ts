@@ -67,9 +67,6 @@ export class WeeklyPlanRepository {
   }
 
   async exportFile(weeklyIds: number[]) {
-    if (weeklyIds.length == 0) {
-      throw new Error("");
-    }
 
     let allReports: any[] = [];
 

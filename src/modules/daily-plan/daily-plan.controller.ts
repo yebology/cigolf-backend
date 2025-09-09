@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { DailyPlanService } from "./daily.plan.service";
+import archiver from "archiver";
+import { stringify } from "csv-stringify/sync";
+import { flattenReport } from "./daily-plan.helper";
 
 const service = new DailyPlanService();
 
@@ -221,5 +224,71 @@ export const updateForemanTask = async (req: Request, res: Response) => {
         area: [(error as Error).message],
       },
     });
+  }
+};
+
+export const exportFile = async (req: Request, res: Response) => {
+  try {
+    const { type, daily_ids } = req.query;
+    const { foreman_id } = req.params;
+
+    let dailyIds: number[] = [];
+    if (typeof daily_ids === "string") {
+      try {
+        dailyIds = JSON.parse(daily_ids);
+      } catch (e) {
+        throw new Error("invalid json weekly ids");
+      }
+    }
+
+    if (String(type) != "csv" && String(type) != "pdf") {
+      throw new Error("invalid type");
+    }
+
+    const allReports = await service.exportFile(Number(foreman_id), dailyIds);
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=daily_reports.zip"
+    );
+
+    const archive = archiver("zip", { zlib: { level: 9 } });
+    archive.pipe(res);
+
+    for (let idx = 0; idx < allReports!.length; idx++) {
+      const report = allReports![idx];
+      const flat = flattenReport(report);
+
+      const csv = stringify(flat, {
+        header: true,
+        columns: {
+          id: "No",
+          taskType: "Jenis Pekerjaan",
+          description: "Detail Pekerjaan",
+          priority: "Prioritas",
+          area: "Area",
+          needWorker: "Jumlah Pekerja yang Diperlukan",
+          availableWorker: "Jumlah Pekerja yang Tersedia",
+          workerList: "Nama Pekerja",
+          isFinished: "Status Pekerjaan",
+        },
+        quoted: true,
+      });
+
+      if (type === "csv") {
+        archive.append(csv, { name: `Laporan Harian ${dailyIds[idx]}.csv` });
+      } else if (type === "pdf") {
+        // const pdfBuffer = await generatePdfFromCsv(csv, weeklyIds[idx]);
+        // archive.append(pdfBuffer, {
+        //   name: `Laporan Mingguan ${weeklyIds[idx]}.pdf`,
+        // });
+      }
+    }
+
+    await archive.finalize();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Terjadi kesalahan saat export file");
   }
 };
