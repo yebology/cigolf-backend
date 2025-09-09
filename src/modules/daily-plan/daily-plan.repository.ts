@@ -26,7 +26,7 @@ export class DailyPlanRepository {
 
     return {
       id: taskId,
-      createdAt: report.created_at?.toISOString().split("T")[0],
+      createdAt: report.date?.toISOString().split("T")[0],
       approved: {
         isApproved: report.is_approved,
         approvedAt: report.approved_at
@@ -90,7 +90,7 @@ export class DailyPlanRepository {
 
     return {
       id: report.id,
-      createdAt: report.created_at?.toISOString().split("T")[0],
+      createdAt: report.date?.toISOString().split("T")[0],
       approved: {
         isApproved: report.is_approved,
         approvedAt: report.approved_at
@@ -304,11 +304,10 @@ export class DailyPlanRepository {
       throw new Error("invalid area value");
     }
 
-    if (!ImageAttachment) {
-      throw new Error("image not included!");
+    var imageUrl = null;
+    if (ImageAttachment) {
+      imageUrl = await uploadImage(ImageAttachment);
     }
-
-    const imageUrl = await uploadImage(ImageAttachment);
 
     const dailyReport = await prisma.daily_report.findFirst({
       where: {
@@ -341,6 +340,7 @@ export class DailyPlanRepository {
         worker_avail: Number(availableWorker),
         worker_name: jsonWorkerNameList.join(", "),
         url_photo: imageUrl,
+        is_done: true
       },
     });
   }
