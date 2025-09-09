@@ -32,7 +32,7 @@ export class WeeklyPlanService {
     await repo.createWeeklyPlan(data);
   }
 
-  async exportFile(weeklyIds: number[], type: string) {
-    return await repo.exportFile(weeklyIds, type);
+  async exportFile(weeklyIds: number[]) {
+    return await repo.exportFile(weeklyIds);
   }
 }

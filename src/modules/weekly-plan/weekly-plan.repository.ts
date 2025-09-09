@@ -66,7 +66,7 @@ export class WeeklyPlanRepository {
     return formatWeeklyReport(report, divisions);
   }
 
-  async exportFile(weeklyIds: number[], type: string) {
+  async exportFile(weeklyIds: number[]) {
     if (weeklyIds.length == 0) {
       throw new Error("");
     }

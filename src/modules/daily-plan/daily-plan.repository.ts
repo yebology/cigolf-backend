@@ -69,22 +69,32 @@ export class DailyPlanRepository {
   }
 
   async findAllDivisionDailyPlan(foremanId: number) {
-    const weeklyDailyReport = await prisma.weekly_report.findFirst({
-      orderBy: {
-        start_date: "desc",
-      },
-      take: 1,
-    });
+    const now = new Date();
 
-    const startDate = weeklyDailyReport?.start_date;
-    const endDate = weeklyDailyReport?.end_date;
+    const utc7Offset = 7 * 60; // dalam menit
+    const localNow = new Date(now.getTime() + utc7Offset * 60 * 1000);
+
+    const startOfToday = new Date(
+      Date.UTC(
+        localNow.getUTCFullYear(),
+        localNow.getUTCMonth(),
+        localNow.getUTCDate()
+      )
+    );
+    const endOfToday = new Date(
+      startOfToday.getTime() + 24 * 60 * 60 * 1000 - 1
+    );
+
+    const sevenDaysAgo = new Date(
+      startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000
+    );
 
     const dailyReport = await prisma.daily_report.findMany({
       where: {
         foreman_id: foremanId,
         date: {
-          gte: startDate,
-          lte: endDate,
+          gte: sevenDaysAgo,
+          lte: endOfToday,
         },
       },
       orderBy: {
