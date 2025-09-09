@@ -35,7 +35,7 @@ router.post(
 router.post(
   `/:foreman_id/daily-task`,
   verifyToken,
-  verifyRole(["Supervisor", "Admin"]),
+  verifyRole(["Supervisor", "Admin", "Mandor"]),
   createNewDivisionDailyPlan
 );
 

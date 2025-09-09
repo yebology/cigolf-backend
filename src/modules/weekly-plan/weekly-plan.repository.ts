@@ -67,6 +67,28 @@ export class WeeklyPlanRepository {
     return formatWeeklyReport(report, divisions);
   }
 
+  async exportFile(weeklyIds: number[], type: string) {
+    if (weeklyIds.length == 0) {
+      throw new Error("");
+    }
+
+    let allReports: any[] = [];
+
+    for (const id of weeklyIds) {
+      const report = await getWeeklyReportWithDetails(id);
+      if (!report) return null;
+
+      const tasks = extractTasks(report);
+      const divisions = groupTasksByDivisionAndLocation(tasks);
+
+      const formatedReport = formatWeeklyReport(report, divisions);
+
+      allReports.concat(formatedReport);
+    }
+
+    console.log(allReports);
+  }
+
   async createWeeklyPlan(data: any) {
     const hasInvalidDay = data.divisions.some((div: any) =>
       div.locations.some((loc: any) =>

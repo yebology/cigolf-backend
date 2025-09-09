@@ -284,12 +284,12 @@ export class DailyPlanRepository {
         id: taskId,
       },
       data: {
-        location_id: Number(locationId), // pastikan Int
-        hole: JSON.stringify(jsonArea), // simpan array ke JSON
-        worker_need: Number(workerNeeded), // pastikan Int
-        worker_avail: Number(availableWorker), // pastikan Int
-        worker_name: jsonWorkerNameList.join(", "), // string biasa
-        url_photo: imageUrl, // dari Supabase
+        location_id: Number(locationId),
+        hole: JSON.stringify(jsonArea),
+        worker_need: Number(workerNeeded),
+        worker_avail: Number(availableWorker),
+        worker_name: jsonWorkerNameList.join(", "),
+        url_photo: imageUrl,
       },
     });
   }

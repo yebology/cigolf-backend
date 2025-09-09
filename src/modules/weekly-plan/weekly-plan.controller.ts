@@ -75,6 +75,16 @@ export const createWeeklyPlan = async (req: Request, res: Response) => {
 export const exportFile = async (req: Request, res: Response) => {
   try {
     const { type, weekly_ids } = req.query;
-    // const result =
-  } catch (error) {}
+
+    let weeklyIds: number[] = [];
+
+    if (typeof weekly_ids === "string") {
+      weeklyIds = weekly_ids.split(",").map((id) => Number(id));
+    }
+
+    await service.exportFile(weeklyIds, String(type));
+
+  } catch (error) {
+    console.log(error);
+  }
 };
