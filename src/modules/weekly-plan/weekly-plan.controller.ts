@@ -1,6 +1,11 @@
 import { Response, Request } from "express";
 import { WeeklyPlanService } from "./weekly-plan.service";
-import { filterWeeklyPlanAttributes } from "./weekly-plan.helper";
+import {
+  filterWeeklyPlanAttributes,
+  flattenReport,
+} from "./weekly-plan.helper";
+import archiver from "archiver";
+import { stringify } from "csv-stringify/sync";
 
 const service = new WeeklyPlanService();
 
@@ -75,15 +80,49 @@ export const createWeeklyPlan = async (req: Request, res: Response) => {
 export const exportFile = async (req: Request, res: Response) => {
   try {
     const { type, weekly_ids } = req.query;
+    console.log("req.query");
+    console.log(req.query);
 
     let weeklyIds: number[] = [];
 
     if (typeof weekly_ids === "string") {
-      weeklyIds = weekly_ids.split(",").map((id) => Number(id));
+      try {
+        weeklyIds = JSON.parse(weekly_ids);
+      } catch (e) {
+        console.error("weekly_ids bukan JSON valid:", weekly_ids);
+      }
     }
+    const allReports = await service.exportFile(weeklyIds, String(type));
 
-    await service.exportFile(weeklyIds, String(type));
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=weekly_reports.zip"
+    );
 
+    const archive = archiver("zip", { zlib: { level: 9 } });
+    archive.pipe(res);
+
+    allReports!.forEach((report, idx) => {
+      const flat = flattenReport(report);
+      const csv = stringify(flat, {
+        header: true,
+        columns: {
+          id: "No",
+          startAt: "Tanggal Mulai",
+          endAt: "Tanggal Selesai",
+          division: "Divisi",
+          location: "Lokasi",
+          taskType: "Tipe Tugas",
+          day: "Hari",
+          description: "Deskripsi",
+          area: "Area",
+        },
+      });
+      archive.append(csv, { name: `Laporan Mingguan ${weeklyIds[idx]}.csv` });
+    });
+
+    await archive.finalize();
   } catch (error) {
     console.log(error);
   }

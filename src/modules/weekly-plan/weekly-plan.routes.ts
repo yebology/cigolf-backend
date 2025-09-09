@@ -10,10 +10,10 @@ import { verifyRole, verifyToken } from "../../middleware/auth.middleware";
 const router = Router();
 
 router.get(
-  `/`,
+  `/export`,
   verifyToken,
   verifyRole(["Admin", "Supervisor"]),
-  getWeeklyPlanHistories
+  exportFile
 );
 router.get(
   `/:id`,
@@ -22,11 +22,12 @@ router.get(
   getWeeklyPlanDetails
 );
 router.get(
-  `/export`,
+  `/`,
   verifyToken,
   verifyRole(["Admin", "Supervisor"]),
-  exportFile
+  getWeeklyPlanHistories
 );
+
 router.post(
   `/`,
   verifyToken,

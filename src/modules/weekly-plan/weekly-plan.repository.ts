@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import {
-  convertToISO,
   extractTasks,
   formatDateFromDay,
   formatWeeklyReport,
@@ -83,10 +82,10 @@ export class WeeklyPlanRepository {
 
       const formatedReport = formatWeeklyReport(report, divisions);
 
-      allReports.concat(formatedReport);
+      allReports.push(formatedReport);
     }
 
-    console.log(allReports);
+    return allReports;
   }
 
   async createWeeklyPlan(data: any) {
