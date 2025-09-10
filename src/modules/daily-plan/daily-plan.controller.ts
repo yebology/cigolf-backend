@@ -297,7 +297,7 @@ export const exportFile = async (req: Request, res: Response) => {
 
       if (type === "csv") {
         archive.append(finalCsv, {
-          name: `Laporan Harian ${report.date}.csv`,
+          name: `Laporan Harian ${report.date} (${report.id}).csv`,
         });
       } else if (type === "pdf") {
         // const pdfBuffer = await generatePdfFromCsv(csv, weeklyIds[idx]);

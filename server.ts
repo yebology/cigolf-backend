@@ -28,7 +28,6 @@ app.use((req, res, next) => {
 
 app.use(`/api/${VERSION}`, userRoutes);
 app.use(`/api/${VERSION}/weekly-plan`, weeklyPlanRoutes);
-console.log("cooookkk");
 
 app.use(`/api/${VERSION}/foreman`, dailyPlanRoutes);
 
