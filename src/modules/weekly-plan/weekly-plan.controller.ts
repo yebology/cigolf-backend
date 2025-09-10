@@ -3,6 +3,7 @@ import { WeeklyPlanService } from "./weekly-plan.service";
 import {
   filterWeeklyPlanAttributes,
   flattenReport,
+  formatDateUTC7,
   generatePdfFromCsv,
 } from "./weekly-plan.helper";
 import archiver from "archiver";
@@ -114,8 +115,8 @@ export const exportFile = async (req: Request, res: Response) => {
         header: true,
         columns: {
           id: "No",
-          startAt: "Tanggal Mulai",
-          endAt: "Tanggal Selesai",
+          // startAt: "Tanggal Mulai",
+          // endAt: "Tanggal Selesai",
           division: "Divisi",
           location: "Lokasi",
           taskType: "Tipe Tugas",
@@ -127,7 +128,7 @@ export const exportFile = async (req: Request, res: Response) => {
       });
 
       if (type === "csv") {
-        archive.append(csv, { name: `Laporan Mingguan ${report.startAt}-${report.endAt}.csv` });
+        archive.append(csv, { name: `Laporan Mingguan ${formatDateUTC7(report.startAt)} - ${formatDateUTC7(report.endAt)}.csv` });
       } else if (type === "pdf") {
         const pdfBuffer = await generatePdfFromCsv(csv, weeklyIds[idx]);
         archive.append(pdfBuffer, {

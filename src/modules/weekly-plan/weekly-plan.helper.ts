@@ -189,8 +189,8 @@ export function flattenReport(report: any) {
       location.tasks.forEach((task: any) => {
         rows.push({
           id: counter++,
-          startAt: formatDateUTC7(report.startAt),
-          endAt: formatDateUTC7(report.endAt),
+          // startAt: formatDateUTC7(report.startAt),
+          // endAt: formatDateUTC7(report.endAt),
           createAt: formatDateUTC7(report.createAt),
           division: division.name,
           location: location.location,
