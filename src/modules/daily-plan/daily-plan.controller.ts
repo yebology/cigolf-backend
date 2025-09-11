@@ -198,8 +198,15 @@ export const selfAddForemanTask = async (req: Request, res: Response) => {
 export const updateForemanTask = async (req: Request, res: Response) => {
   try {
     const { foreman_id, daily_report_id, task_id } = req.params;
-    const { locationId, area, workerNeeded, availableWorker, workerNameList } =
-      req.body;
+    const {
+      locationId,
+      area,
+      workerNeeded,
+      availableWorker,
+      workerNameList,
+      jobType,
+      description,
+    } = req.body;
 
     await service.updateForemanTask(
       Number(foreman_id),
@@ -210,6 +217,8 @@ export const updateForemanTask = async (req: Request, res: Response) => {
       workerNeeded,
       availableWorker,
       workerNameList,
+      jobType,
+      description,
       req.file
     );
     res.json({

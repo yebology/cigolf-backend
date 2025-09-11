@@ -92,6 +92,8 @@ export class DailyPlanService {
     workerNeeded: number,
     availableWorker: number,
     workerNameList: string,
+    jobType: string,
+    description: string,
     ImageAttachment?: Express.Multer.File
   ) {
     await repo.updateForemanTask(
@@ -103,6 +105,8 @@ export class DailyPlanService {
       workerNeeded,
       availableWorker,
       workerNameList,
+      jobType,
+      description,
       ImageAttachment
     );
   }

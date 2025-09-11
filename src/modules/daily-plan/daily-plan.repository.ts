@@ -59,7 +59,9 @@ export class DailyPlanRepository {
         allReports.push({
           id: id,
           date: formatDateUTC7(report!.date.toISOString().split("T")[0]),
-          createdAt: formatDateUTC7(report!.created_at!.toISOString().split("T")[0]),
+          createdAt: formatDateUTC7(
+            report!.created_at!.toISOString().split("T")[0]
+          ),
           approved: {
             isApproved: report!.is_approved,
             approvedAt: report!.approved_at
@@ -295,6 +297,8 @@ export class DailyPlanRepository {
     workerNeeded: number,
     availableWorker: number,
     workerNameList: string,
+    jobType: string,
+    description: string,
     ImageAttachment?: Express.Multer.File
   ) {
     const jsonArea = JSON.parse(area);
@@ -337,10 +341,12 @@ export class DailyPlanRepository {
           ? jsonArea.join(", ")
           : String(jsonArea ?? ""),
         worker_need: Number(workerNeeded),
+        title_task: jobType,
+        detail: description,
         worker_avail: Number(availableWorker),
         worker_name: jsonWorkerNameList.join(", "),
         url_photo: imageUrl,
-        is_done: true
+        is_done: true,
       },
     });
   }
