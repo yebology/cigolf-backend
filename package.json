@@ -4,7 +4,7 @@
   "main": "server.ts",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "npm install && node dist/server.js",
     "dev": "nodemon --watch './**/*.ts' --exec 'tsc && node dist/server.js'"
   },
   "keywords": [],
