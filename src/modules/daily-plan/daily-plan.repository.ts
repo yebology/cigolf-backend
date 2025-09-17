@@ -11,6 +11,8 @@ import {
   uploadImage,
 } from "./daily-plan.helper";
 import { Request } from "express";
+import { sendNotification } from "../../utils/notification/onesignal";
+
 
 const prisma = new PrismaClient();
 
@@ -203,6 +205,14 @@ export class DailyPlanRepository {
         });
       }
     }
+
+    const foreman = await findForeman(foremanId);
+    
+    await sendNotification({
+        title: "Laporan Harian Baru Telah Dibuat Untuk Anda",
+        message: `Laporan harian pada tanggal ${newDailyReport.date.toISOString().split("T")[0]} telah dibuat.`,
+        externalIds: [`User-${foreman?.user_id}`]
+      });
   }
 
   async approveForemanTodayTasks(
@@ -234,6 +244,17 @@ export class DailyPlanRepository {
           approved_by: spvId,
           approved_at: new Date().toISOString(),
         },
+      });
+
+      const foreman = await findForeman(foremanId);
+      const spv = await prisma.user.findUnique({
+        where: { id: spvId },
+      });
+
+      await sendNotification({
+        title: "Laporan Harian Disetujui",
+        message: `Laporan harian anda telah disetujui oleh ${spv?.name.split(" ")[0]}.`,
+        externalIds: [`User-${foreman?.user_id}`]
       });
     }
   }
@@ -286,6 +307,18 @@ export class DailyPlanRepository {
         dailyrep_id: newDailyReport!.id,
       },
     });
+
+    const foreman = await findForeman(foremanId);
+    const division = await prisma.division.findUnique({
+      where: { id: divisionId },
+    });
+
+    await sendNotification({
+        title: "Tugas Baru Ditambahkan Untuk Anda",
+        message: `${division?.division} task: ${jobType}.`,
+        subtitle: `${description}`,
+        externalIds: [`User-${foreman?.user_id}`]
+      });
   }
 
   async updateForemanTask(
@@ -349,7 +382,22 @@ export class DailyPlanRepository {
         is_done: true,
       },
     });
-  }
+
+    const foreman = await findForeman(foremanId);
+    const user = await prisma.user.findUnique({
+        where: { id: foreman?.user_id },
+      });
+    await sendNotification({
+        title: `${user?.name.split(" ")[0]} Telah Memperbarui Tugas Harian`,
+        message: `${jobType} telah diperbarui.`,
+        tags: [{ 
+          key: "role",relation: "=", value: "Supervisor" 
+        },{ 
+          key: "role",relation: "=", value: "Admin" 
+        }
+        ]
+      });
+    }
 
   //   async findAll() {
   //     return await prisma.daily_report.findMany({
