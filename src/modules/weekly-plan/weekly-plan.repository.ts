@@ -8,6 +8,7 @@ import {
   isValidDay,
   parseDate,
 } from "./weekly-plan.helper";
+import { sendNotification } from "../../utils/notification/onesignal";
 
 const prisma = new PrismaClient();
 
@@ -129,5 +130,16 @@ export class WeeklyPlanRepository {
         }
       }
     }
+
+    await sendNotification({
+      title: "Rencana Mingguan Baru Telah Dibuat",
+      message: `Rencana mingguan pada tanggal ${data.startAt} hingga ${data.endAt} telah dibuat.`,
+      tags: [{ 
+          key: "role", relation: "=", value: "Supervisor" 
+        },{ 
+          key: "role", relation: "=", value: "Admin" 
+        }
+        ]
+    });
   }
 }
